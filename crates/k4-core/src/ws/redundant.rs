@@ -93,8 +93,8 @@ impl RedundantWsClient {
         }
 
         // Reset the worst one
-        if let Some(idx) = worst_idx {
-            if self.connections.len() > 1 {
+        if let Some(idx) = worst_idx
+            && self.connections.len() > 1 {
                 warn!("[redundant] resetting slowest connection (idx={idx}, avg={worst_avg:.0}µs)");
                 // Stop the old connection
                 if let Some(conn) = self.connections.get_mut(idx) {
@@ -115,7 +115,6 @@ impl RedundantWsClient {
 
                 return Some(idx);
             }
-        }
 
         // Reset all latency collectors for the next evaluation period
         for lc in &mut self.latency_collectors {

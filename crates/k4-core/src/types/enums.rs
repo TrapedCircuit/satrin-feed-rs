@@ -56,7 +56,9 @@ impl std::fmt::Display for Exchange {
     RkyvDeserialize,
 )]
 #[repr(u8)]
+#[derive(Default)]
 pub enum ProductType {
+    #[default]
     Spot = 0,
     Futures = 1,
     UMargin = 2,
@@ -67,11 +69,6 @@ pub enum ProductType {
     BtcMargin = 7,
 }
 
-impl Default for ProductType {
-    fn default() -> Self {
-        Self::Spot
-    }
-}
 
 // ---------------------------------------------------------------------------
 // Message types

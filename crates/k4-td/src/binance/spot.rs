@@ -368,15 +368,15 @@ impl SpotClient {
         let timestamp = current_timestamp_ms();
 
         let mut params: Vec<(&str, String)> = vec![
-            ("symbol".into(), symbol.to_string()),
-            ("timestamp".into(), timestamp),
-            ("recvWindow".into(), self.recv_window.to_string()),
+            ("symbol", symbol.to_string()),
+            ("timestamp", timestamp),
+            ("recvWindow", self.recv_window.to_string()),
         ];
         if let Some(oid) = order_id {
-            params.push(("orderId".into(), oid.to_string()));
+            params.push(("orderId", oid.to_string()));
         }
         if let Some(cid) = client_order_id {
-            params.push(("origClientOrderId".into(), cid.to_string()));
+            params.push(("origClientOrderId", cid.to_string()));
         }
 
         let query_str: String = params
@@ -440,14 +440,13 @@ impl SpotClient {
                     frame = ws_read.next() => {
                         match frame {
                             Some(Ok(Message::Text(text))) => {
-                                if let Ok(val) = serde_json::from_str::<serde_json::Value>(&text) {
-                                    if let Some(id_val) = val.get("id").and_then(|i| i.as_str()) {
+                                if let Ok(val) = serde_json::from_str::<serde_json::Value>(&text)
+                                    && let Some(id_val) = val.get("id").and_then(|i| i.as_str()) {
                                         let mut map = pending_clone.lock().await;
                                         if let Some(sender) = map.remove(id_val) {
                                             let _ = sender.send(val);
                                         }
                                     }
-                                }
                             }
                             Some(Ok(Message::Ping(data))) => {
                                 let _ = ws_write.send(Message::Pong(data)).await;

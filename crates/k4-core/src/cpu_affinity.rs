@@ -43,9 +43,8 @@ pub fn bind_to_core(core_id: usize) -> bool {
 ///
 /// Convenience wrapper that does nothing for `None` (no affinity configured).
 pub fn maybe_bind(core_id: Option<i32>) {
-    if let Some(id) = core_id {
-        if id >= 0 {
+    if let Some(id) = core_id
+        && id >= 0 {
             bind_to_core(id as usize);
         }
-    }
 }

@@ -180,7 +180,7 @@ fn parse_depth_to_md(
     let mut books_guard = books.lock().unwrap();
     let book = books_guard
         .entry(sym.to_string())
-        .or_insert_with(OrderBook::<50>::new);
+        .or_default();
 
     if msg_type == "snapshot" {
         book.set_snapshot(&bids, &asks);

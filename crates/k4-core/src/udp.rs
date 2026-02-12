@@ -162,32 +162,28 @@ macro_rules! decode_rkyv {
 fn dispatch_payload(msg_type: u8, payload: &[u8], handler: &UdpCallbackHandler) {
     match msg_type {
         t if t == MessageType::BookTicker as u8 => {
-            if let Some(cb) = &handler.on_bbo {
-                if let Some(bbo) = decode_rkyv!(Bookticker, payload) {
+            if let Some(cb) = &handler.on_bbo
+                && let Some(bbo) = decode_rkyv!(Bookticker, payload) {
                     cb(bbo);
                 }
-            }
         }
         t if t == MessageType::Trade as u8 => {
-            if let Some(cb) = &handler.on_trade {
-                if let Some(trade) = decode_rkyv!(Trade, payload) {
+            if let Some(cb) = &handler.on_trade
+                && let Some(trade) = decode_rkyv!(Trade, payload) {
                     cb(trade);
                 }
-            }
         }
         t if t == MessageType::AggTrade as u8 => {
-            if let Some(cb) = &handler.on_agg_trade {
-                if let Some(agg) = decode_rkyv!(AggTrade, payload) {
+            if let Some(cb) = &handler.on_agg_trade
+                && let Some(agg) = decode_rkyv!(AggTrade, payload) {
                     cb(agg);
                 }
-            }
         }
         t if t == MessageType::Depth5 as u8 => {
-            if let Some(cb) = &handler.on_depth5 {
-                if let Some(depth) = decode_rkyv!(Depth5, payload) {
+            if let Some(cb) = &handler.on_depth5
+                && let Some(depth) = decode_rkyv!(Depth5, payload) {
                     cb(depth);
                 }
-            }
         }
         _ => {
             debug!("Unknown UDP message type: {msg_type}");

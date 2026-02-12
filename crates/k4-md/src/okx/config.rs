@@ -107,11 +107,10 @@ pub fn to_okx_inst_id(symbol: &str) -> String {
     }
     const QUOTES: &[&str] = &["USDT", "USDC", "BTC", "ETH", "BUSD", "DAI"];
     for q in QUOTES {
-        if let Some(base) = symbol.strip_suffix(q) {
-            if !base.is_empty() {
+        if let Some(base) = symbol.strip_suffix(q)
+            && !base.is_empty() {
                 return format!("{base}-{q}");
             }
-        }
     }
     symbol.to_string()
 }
