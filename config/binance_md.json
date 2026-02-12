@@ -1,0 +1,46 @@
+{
+  "RazorTrade": {
+    "module_name": "binance_md",
+    "log_path": "/tmp/k4_logs"
+  },
+  "connections": [
+    {
+      "RazorTrade": {
+        "module_name": "binance_md",
+        "log_path": "/tmp/k4_logs"
+      },
+      "exchange": "binance",
+      "md_size": 100000,
+      "hb_interval_sec": 30,
+      "redun_reset_on_hb": true,
+      "redun_reset_on_threshold": 10000,
+      "spot": {
+        "symbols": ["BTCUSDT", "ETHUSDT"],
+        "redun_conn_count": 2,
+        "cpu_affinity_conn": [0, 1],
+        "cpu_affinity_dedup": 2,
+        "bbo_shm_name": "binance_spot_bbo",
+        "aggtrade_shm_name": "binance_spot_aggtrade",
+        "trade_shm_name": "binance_spot_trade",
+        "depth5_shm_name": "binance_spot_depth5",
+        "extra_headers": {}
+      },
+      "futures": {
+        "ubase_symbols": ["BTCUSDT", "ETHUSDT"],
+        "ubase_conn_count": 2,
+        "cpu_affinity": [3, 4],
+        "cpu_affinity_dedup": 5,
+        "bbo_shm_name": "binance_ubase_bbo",
+        "aggtrade_shm_name": "binance_ubase_aggtrade",
+        "trade_shm_name": "binance_ubase_trade",
+        "depth5_shm_name": "binance_ubase_depth5"
+      },
+      "udp_sender": {
+        "ip": "127.0.0.1",
+        "port": 9000,
+        "cpu_affinity": 6,
+        "enabled": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "RazorTrade": {
+    "module_name": "okx_md",
+    "log_path": "/tmp/k4_logs"
+  },
+  "connections": [
+    {
+      "RazorTrade": {
+        "module_name": "okx_md",
+        "log_path": "/tmp/k4_logs"
+      },
+      "exchange": "okx",
+      "shm_block_num": 100000,
+      "ping_interval_sec": 25,
+      "hb_interval_sec": 30,
+      "redun_reset_on_hb": true,
+      "spot": {
+        "symbols": ["BTCUSDT", "ETHUSDT"],
+        "redun_conn_count": 2,
+        "cpu_affinity_conn": [0, 1],
+        "cpu_affinity_dedup": 2,
+        "bbo_shm_name": "okx_spot_bbo",
+        "trade_shm_name": "okx_spot_trade",
+        "depth5_shm_name": "okx_spot_depth5"
+      },
+      "swap": {
+        "symbols": ["BTCUSDT", "ETHUSDT"],
+        "redun_conn_count": 2,
+        "cpu_affinity_conn": [3, 4],
+        "cpu_affinity_dedup": 5,
+        "bbo_shm_name": "okx_swap_bbo",
+        "trade_shm_name": "okx_swap_trade",
+        "depth5_shm_name": "okx_swap_depth5"
+      },
+      "udp_sender": {
+        "ip": "127.0.0.1",
+        "port": 9001,
+        "enabled": false
+      }
+    }
+  ]
+}

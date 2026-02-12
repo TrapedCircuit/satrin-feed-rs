@@ -1,0 +1,38 @@
+{
+  "RazorTrade": {
+    "module_name": "bitget_md",
+    "log_path": "/tmp/k4_logs"
+  },
+  "connections": [
+    {
+      "RazorTrade": {
+        "module_name": "bitget_md",
+        "log_path": "/tmp/k4_logs"
+      },
+      "exchange": "bitget",
+      "shm_block_num": 100000,
+      "ping_interval_sec": 25,
+      "hb_interval_sec": 30,
+      "redun_reset_on_hb": true,
+      "spot": {
+        "symbols": ["BTCUSDT", "ETHUSDT"],
+        "redun_conn_count": 2,
+        "bbo_shm_name": "bitget_spot_bbo",
+        "trade_shm_name": "bitget_spot_trade",
+        "depth5_shm_name": "bitget_spot_depth5"
+      },
+      "futures": {
+        "symbols": ["BTCUSDT", "ETHUSDT"],
+        "redun_conn_count": 2,
+        "bbo_shm_name": "bitget_futures_bbo",
+        "trade_shm_name": "bitget_futures_trade",
+        "depth5_shm_name": "bitget_futures_depth5"
+      },
+      "udp_sender": {
+        "ip": "127.0.0.1",
+        "port": 9002,
+        "enabled": false
+      }
+    }
+  ]
+}

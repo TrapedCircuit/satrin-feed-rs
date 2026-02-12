@@ -1,0 +1,31 @@
+{
+  "RazorTrade": {
+    "module_name": "udp_md",
+    "log_path": "/tmp/k4_logs"
+  },
+  "connections": [
+    {
+      "RazorTrade": {
+        "module_name": "udp_md",
+        "log_path": "/tmp/k4_logs"
+      },
+      "exchange": "udp",
+      "md_size": 100000,
+      "udp_receiver": {
+        "ip": "0.0.0.0",
+        "port": 9000,
+        "recv_cpu_affinity": 7,
+        "spot_symbols": ["BTCUSDT", "ETHUSDT"],
+        "ubase_symbols": ["BTCUSDT", "ETHUSDT"],
+        "spot_bbo_shm_name": "udp_spot_bbo",
+        "spot_agg_shm_name": "udp_spot_aggtrade",
+        "spot_trade_shm_name": "udp_spot_trade",
+        "spot_depth5_shm_name": "udp_spot_depth5",
+        "ubase_bbo_shm_name": "udp_ubase_bbo",
+        "ubase_agg_shm_name": "udp_ubase_aggtrade",
+        "ubase_trade_shm_name": "udp_ubase_trade",
+        "ubase_depth5_shm_name": "udp_ubase_depth5"
+      }
+    }
+  ]
+}

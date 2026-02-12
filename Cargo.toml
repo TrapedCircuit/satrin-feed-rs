@@ -1,0 +1,69 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/k4-core",
+    "crates/k4-md",
+    "crates/k4-td",
+    "crates/k4-runner",
+]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rkyv = "0.8"
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing-appender = "0.2"
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "native-tls"] }
+
+# WebSocket
+tokio-tungstenite = { version = "0.26", features = ["native-tls"] }
+futures-util = "0.3"
+
+# Hashing
+ahash = "0.8"
+
+# Concurrency
+crossbeam-channel = "0.5"
+
+# Crypto
+hmac = "0.12"
+sha2 = "0.10"
+ed25519-dalek = { version = "2", features = ["pkcs8", "pem"] }
+
+# Misc
+urlencoding = "2"
+uuid = { version = "1", features = ["v4"] }
+core_affinity = "0.8"
+fast-float2 = "0.2"
+xxhash-rust = { version = "0.8", features = ["xxh64"] }
+
+# Workspace crates
+k4-core = { path = "crates/k4-core" }
+k4-md = { path = "crates/k4-md" }
+k4-td = { path = "crates/k4-td" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
