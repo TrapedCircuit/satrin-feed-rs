@@ -3,9 +3,7 @@
 use anyhow::{Result, anyhow};
 use k4_core::config::ConnectionConfig;
 
-use crate::MdModule;
-use crate::pipeline::GenericMd;
-use crate::udp::UdpMd;
+use crate::{MdModule, pipeline::GenericMd, udp::UdpMd};
 
 /// Create an `MdModule` based on the `exchange` field in the config.
 ///

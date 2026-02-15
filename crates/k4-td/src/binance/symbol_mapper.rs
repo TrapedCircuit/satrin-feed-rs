@@ -25,47 +25,35 @@ const COMMON_QUOTES: &[&str] = &["USDT", "USDC", "BUSD", "BTC", "ETH", "BNB", "T
 
 /// Common base assets for pre-populated default mappings.
 const COMMON_BASES: &[&str] = &[
-    "BTC", "ETH", "BNB", "SOL", "XRP", "DOGE", "ADA", "AVAX", "DOT", "MATIC", "LINK", "UNI",
-    "ATOM", "LTC", "ETC", "FIL", "APT", "ARB", "OP", "NEAR",
+    "BTC", "ETH", "BNB", "SOL", "XRP", "DOGE", "ADA", "AVAX", "DOT", "MATIC", "LINK", "UNI", "ATOM", "LTC", "ETC",
+    "FIL", "APT", "ARB", "OP", "NEAR",
 ];
 
 impl SymbolMapper {
     /// Create a new mapper pre-loaded with default common pair mappings.
     pub fn new() -> Self {
-        let mut mapper = Self {
-            exchange_to_display: HashMap::new(),
-            display_to_exchange: HashMap::new(),
-        };
+        let mut mapper = Self { exchange_to_display: HashMap::new(), display_to_exchange: HashMap::new() };
         mapper.load_defaults();
         mapper
     }
 
     /// Create an empty mapper with no default mappings.
     pub fn empty() -> Self {
-        Self {
-            exchange_to_display: HashMap::new(),
-            display_to_exchange: HashMap::new(),
-        }
+        Self { exchange_to_display: HashMap::new(), display_to_exchange: HashMap::new() }
     }
 
     /// Convert an exchange symbol to display format.
     ///
     /// Returns the original string if no mapping exists.
     pub fn to_display<'a>(&'a self, exchange: &'a str) -> &'a str {
-        self.exchange_to_display
-            .get(exchange)
-            .map(|s| s.as_str())
-            .unwrap_or(exchange)
+        self.exchange_to_display.get(exchange).map(|s| s.as_str()).unwrap_or(exchange)
     }
 
     /// Convert a display symbol to exchange format.
     ///
     /// Returns the original string if no mapping exists.
     pub fn to_exchange<'a>(&'a self, display: &'a str) -> &'a str {
-        self.display_to_exchange
-            .get(display)
-            .map(|s| s.as_str())
-            .unwrap_or(display)
+        self.display_to_exchange.get(display).map(|s| s.as_str()).unwrap_or(display)
     }
 
     /// Add a single bidirectional mapping.
@@ -75,10 +63,8 @@ impl SymbolMapper {
     /// * `exchange` — exchange format (e.g. `"BTCUSDT"`).
     /// * `display` — display format (e.g. `"BTC/USDT"`).
     pub fn add_mapping(&mut self, exchange: &str, display: &str) {
-        self.exchange_to_display
-            .insert(exchange.to_string(), display.to_string());
-        self.display_to_exchange
-            .insert(display.to_string(), exchange.to_string());
+        self.exchange_to_display.insert(exchange.to_string(), display.to_string());
+        self.display_to_exchange.insert(display.to_string(), exchange.to_string());
     }
 
     /// Load mappings from a Binance `exchangeInfo` JSON response.

@@ -2,10 +2,10 @@
 //!
 //! Binance supports two signing methods:
 //!
-//! 1. **HMAC-SHA256** — the standard method. The secret key is a hex string
-//!    provided by Binance. Used for most REST and WebSocket API requests.
-//! 2. **Ed25519** — a newer method using an Ed25519 keypair. The private key
-//!    is loaded from a PEM file. Used for reduced-latency order operations.
+//! 1. **HMAC-SHA256** — the standard method. The secret key is a hex string provided by Binance.
+//!    Used for most REST and WebSocket API requests.
+//! 2. **Ed25519** — a newer method using an Ed25519 keypair. The private key is loaded from a PEM
+//!    file. Used for reduced-latency order operations.
 //!
 //! Both methods produce a `signature` parameter that is appended to the
 //! URL-encoded query string.
@@ -31,8 +31,7 @@ type HmacSha256 = Hmac<Sha256>;
 /// assert_eq!(sig.len(), 64); // 32 bytes → 64 hex chars
 /// ```
 pub fn hmac_sha256_sign(secret: &str, message: &str) -> String {
-    let mut mac =
-        HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC accepts any key length");
+    let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC accepts any key length");
     mac.update(message.as_bytes());
     let result = mac.finalize();
     hex::encode(result.into_bytes())
@@ -80,11 +79,10 @@ pub fn build_signed_query(params: &[(&str, &str)], secret: &str) -> String {
 ///
 /// Returns an error if the PEM cannot be parsed or the key is invalid.
 pub fn ed25519_sign(private_key_pem: &str, message: &str) -> Result<String> {
-    use ed25519_dalek::pkcs8::DecodePrivateKey;
-    use ed25519_dalek::{Signer, SigningKey};
+    use ed25519_dalek::{Signer, SigningKey, pkcs8::DecodePrivateKey};
 
-    let signing_key = SigningKey::from_pkcs8_pem(private_key_pem)
-        .context("failed to parse Ed25519 private key from PEM")?;
+    let signing_key =
+        SigningKey::from_pkcs8_pem(private_key_pem).context("failed to parse Ed25519 private key from PEM")?;
 
     let signature = signing_key.sign(message.as_bytes());
     let encoded = base64::engine::general_purpose::STANDARD.encode(signature.to_bytes());
@@ -108,10 +106,7 @@ mod tests {
 
     #[test]
     fn build_signed_query_includes_signature() {
-        let query = build_signed_query(
-            &[("symbol", "BTCUSDT"), ("timestamp", "1234567890")],
-            "test_secret",
-        );
+        let query = build_signed_query(&[("symbol", "BTCUSDT"), ("timestamp", "1234567890")], "test_secret");
         assert!(query.starts_with("symbol=BTCUSDT&timestamp=1234567890&signature="));
     }
 }

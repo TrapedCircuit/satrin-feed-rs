@@ -120,11 +120,7 @@ impl FuturesClient {
 
     /// Create a new listen key for the user-data stream.
     pub async fn create_listen_key(&self) -> Result<String> {
-        let url = format!(
-            "{}{}/v1/listenKey",
-            self.base_url,
-            self.variant.path_prefix()
-        );
+        let url = format!("{}{}/v1/listenKey", self.base_url, self.variant.path_prefix());
         let resp = self
             .http
             .post(&url)
@@ -133,11 +129,7 @@ impl FuturesClient {
             .await
             .context("create listen key request failed")?;
 
-        let body: serde_json::Value = resp
-            .error_for_status()
-            .context("create listen key HTTP error")?
-            .json()
-            .await?;
+        let body: serde_json::Value = resp.error_for_status().context("create listen key HTTP error")?.json().await?;
 
         let key = body
             .get("listenKey")
@@ -157,11 +149,7 @@ impl FuturesClient {
             return Err(anyhow!("no active listen key"));
         };
 
-        let url = format!(
-            "{}{}/v1/listenKey",
-            self.base_url,
-            self.variant.path_prefix()
-        );
+        let url = format!("{}{}/v1/listenKey", self.base_url, self.variant.path_prefix());
         self.http
             .put(&url)
             .header("X-MBX-APIKEY", &self.api_key)
@@ -183,11 +171,7 @@ impl FuturesClient {
             return Ok(());
         };
 
-        let url = format!(
-            "{}{}/v1/listenKey",
-            self.base_url,
-            self.variant.path_prefix()
-        );
+        let url = format!("{}{}/v1/listenKey", self.base_url, self.variant.path_prefix());
         self.http
             .delete(&url)
             .header("X-MBX-APIKEY", &self.api_key)
@@ -216,28 +200,14 @@ impl FuturesClient {
         };
         let timestamp = current_timestamp_ms();
         let query = auth::build_signed_query(
-            &[
-                ("recvWindow", &self.recv_window.to_string()),
-                ("timestamp", &timestamp),
-            ],
+            &[("recvWindow", &self.recv_window.to_string()), ("timestamp", &timestamp)],
             &self.secret_key,
         );
 
-        let url = format!(
-            "{}{}/{version}/account?{query}",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/{version}/account?{query}", self.base_url, self.variant.path_prefix(),);
 
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .header("X-MBX-APIKEY", &self.api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value =
+            self.http.get(&url).header("X-MBX-APIKEY", &self.api_key).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -253,21 +223,10 @@ impl FuturesClient {
         }
 
         let query = auth::build_signed_query(&params, &self.secret_key);
-        let url = format!(
-            "{}{}/v1/openOrders?{query}",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/v1/openOrders?{query}", self.base_url, self.variant.path_prefix(),);
 
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .header("X-MBX-APIKEY", &self.api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value =
+            self.http.get(&url).header("X-MBX-APIKEY", &self.api_key).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -289,41 +248,19 @@ impl FuturesClient {
         }
 
         let query = auth::build_signed_query(&params, &self.secret_key);
-        let url = format!(
-            "{}{}/{version}/positionRisk?{query}",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/{version}/positionRisk?{query}", self.base_url, self.variant.path_prefix(),);
 
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .header("X-MBX-APIKEY", &self.api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value =
+            self.http.get(&url).header("X-MBX-APIKEY", &self.api_key).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
 
     /// Fetch exchange info (symbol list, filters, etc.).
     pub async fn get_exchange_info(&self) -> Result<serde_json::Value> {
-        let url = format!(
-            "{}{}/v1/exchangeInfo",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/v1/exchangeInfo", self.base_url, self.variant.path_prefix(),);
 
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value = self.http.get(&url).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -363,21 +300,10 @@ impl FuturesClient {
         }
 
         let query = auth::build_signed_query(&params, &self.secret_key);
-        let url = format!(
-            "{}{}/v1/order?{query}",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/v1/order?{query}", self.base_url, self.variant.path_prefix(),);
 
-        let resp: serde_json::Value = self
-            .http
-            .post(&url)
-            .header("X-MBX-APIKEY", &self.api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value =
+            self.http.post(&url).header("X-MBX-APIKEY", &self.api_key).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -402,11 +328,7 @@ impl FuturesClient {
         }
 
         let query = auth::build_signed_query(&params, &self.secret_key);
-        let url = format!(
-            "{}{}/v1/order?{query}",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/v1/order?{query}", self.base_url, self.variant.path_prefix(),);
 
         let resp: serde_json::Value = self
             .http
@@ -425,19 +347,11 @@ impl FuturesClient {
     pub async fn cancel_all_orders(&self, symbol: &str) -> Result<serde_json::Value> {
         let timestamp = current_timestamp_ms();
         let query = auth::build_signed_query(
-            &[
-                ("symbol", symbol),
-                ("recvWindow", &self.recv_window.to_string()),
-                ("timestamp", &timestamp),
-            ],
+            &[("symbol", symbol), ("recvWindow", &self.recv_window.to_string()), ("timestamp", &timestamp)],
             &self.secret_key,
         );
 
-        let url = format!(
-            "{}{}/v1/allOpenOrders?{query}",
-            self.base_url,
-            self.variant.path_prefix(),
-        );
+        let url = format!("{}{}/v1/allOpenOrders?{query}", self.base_url, self.variant.path_prefix(),);
 
         let resp: serde_json::Value = self
             .http
@@ -460,9 +374,5 @@ impl FuturesClient {
 
 /// Returns the current Unix timestamp in milliseconds.
 fn current_timestamp_ms() -> String {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis()
-        .to_string()
+    SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis().to_string()
 }

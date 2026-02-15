@@ -19,18 +19,17 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use k4_core::enums::AccountType;
-use k4_core::trading::*;
+use k4_core::{enums::AccountType, trading::*};
 
 /// Trait implemented by all trading modules.
 ///
 /// # Lifecycle
 ///
 /// 1. Construct via exchange-specific `new(config)`.
-/// 2. Call [`login`](TdModule::login) to authenticate, create listen keys,
-///    and establish user-data WebSocket streams.
-/// 3. Use [`insert_order`](TdModule::insert_order),
-///    [`cancel_order`](TdModule::cancel_order), etc. for order management.
+/// 2. Call [`login`](TdModule::login) to authenticate, create listen keys, and establish user-data
+///    WebSocket streams.
+/// 3. Use [`insert_order`](TdModule::insert_order), [`cancel_order`](TdModule::cancel_order), etc.
+///    for order management.
 /// 4. Call [`stop`](TdModule::stop) to close all connections and clean up.
 ///
 /// All order operations take `&self` so they can be called concurrently from

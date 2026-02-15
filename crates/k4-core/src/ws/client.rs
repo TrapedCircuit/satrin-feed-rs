@@ -7,9 +7,7 @@
 //! 4. Sends periodic ping messages (exchange-specific format).
 //! 5. Automatically reconnects on disconnection with exponential backoff.
 
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use futures_util::{SinkExt, StreamExt};
 use tokio::sync::{mpsc, watch};
@@ -69,12 +67,7 @@ pub struct WsConnection {
 impl WsConnection {
     /// Create a new (not yet started) connection.
     pub fn new(config: WsConnConfig) -> Self {
-        Self {
-            config,
-            outbound_tx: None,
-            shutdown_tx: None,
-            task: None,
-        }
+        Self { config, outbound_tx: None, shutdown_tx: None, task: None }
     }
 
     /// Start the connection task.
@@ -262,9 +255,7 @@ async fn connection_loop(
 /// key for Binance SBE) are injected after the request is built.
 async fn connect_ws(
     config: &WsConnConfig,
-) -> anyhow::Result<
-    tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
-> {
+) -> anyhow::Result<tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>> {
     use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 
     // Let tungstenite generate proper WS handshake headers from the URL.

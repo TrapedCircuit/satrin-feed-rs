@@ -3,8 +3,10 @@
 //! The strategy layer subscribes to a [`TdEventReceiver`] channel and reacts
 //! to order updates, position changes, and connection lifecycle events.
 
-use k4_core::enums::AccountType;
-use k4_core::trading::{OrderUpdate, Position};
+use k4_core::{
+    enums::AccountType,
+    trading::{OrderUpdate, Position},
+};
 
 /// A typed event emitted by a [`TdModule`](crate::TdModule) implementation.
 #[derive(Debug, Clone)]

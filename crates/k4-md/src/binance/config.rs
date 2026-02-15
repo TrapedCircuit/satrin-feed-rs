@@ -1,8 +1,9 @@
 //! Binance-specific configuration extraction.
 
+use std::collections::HashMap;
+
 use anyhow::Result;
 use k4_core::config::ConnectionConfig;
-use std::collections::HashMap;
 
 /// Parsed Binance configuration.
 #[derive(Debug, Clone)]
@@ -38,27 +39,20 @@ impl BinanceConfig {
         let md_size = conn.effective_md_size();
 
         // Spot config
-        let (
-            spot_symbols,
-            spot_conn_count,
-            spot_bbo,
-            spot_agg,
-            spot_trade,
-            spot_depth5,
-            spot_headers,
-        ) = if let Some(ref spot) = conn.spot {
-            (
-                spot.symbols.clone().unwrap_or_default(),
-                spot.redun_conn_count.unwrap_or(1),
-                spot.bbo_shm_name.clone(),
-                spot.aggtrade_shm_name.clone(),
-                spot.trade_shm_name.clone(),
-                spot.depth5_shm_name.clone(),
-                spot.extra_headers.clone().unwrap_or_default(),
-            )
-        } else {
-            (vec![], 1, None, None, None, None, HashMap::new())
-        };
+        let (spot_symbols, spot_conn_count, spot_bbo, spot_agg, spot_trade, spot_depth5, spot_headers) =
+            if let Some(ref spot) = conn.spot {
+                (
+                    spot.symbols.clone().unwrap_or_default(),
+                    spot.redun_conn_count.unwrap_or(1),
+                    spot.bbo_shm_name.clone(),
+                    spot.aggtrade_shm_name.clone(),
+                    spot.trade_shm_name.clone(),
+                    spot.depth5_shm_name.clone(),
+                    spot.extra_headers.clone().unwrap_or_default(),
+                )
+            } else {
+                (vec![], 1, None, None, None, None, HashMap::new())
+            };
 
         // Futures/UBase config
         let (ubase_symbols, ubase_conn_count, ub_bbo, ub_agg, ub_trade, ub_depth5, ub_headers) =

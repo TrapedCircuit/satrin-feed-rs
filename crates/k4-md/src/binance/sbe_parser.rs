@@ -18,8 +18,7 @@
 //! Prices and quantities use a mantissa (i64) + exponent (i8) format:
 //! `value = mantissa × 10^(exponent + 18)`
 
-use k4_core::time_util;
-use k4_core::*;
+use k4_core::{time_util, *};
 
 const SBE_HEADER_SIZE: usize = 8;
 const TEMPLATE_TRADES: u16 = 10000;

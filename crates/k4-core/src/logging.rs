@@ -18,31 +18,17 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 /// - `log_dir`: optional directory for daily-rotating log files
 /// - `module_name`: used as the log file prefix (e.g. `"binance_md"`)
 pub fn init_logging(log_level: &str, log_dir: Option<&str>, module_name: &str) {
-    let env_filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(log_level));
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(log_level));
 
-    let console_layer = fmt::layer()
-        .with_target(true)
-        .with_thread_ids(true)
-        .with_ansi(true);
+    let console_layer = fmt::layer().with_target(true).with_thread_ids(true).with_ansi(true);
 
     if let Some(dir) = log_dir {
         let file_appender = tracing_appender::rolling::daily(dir, module_name);
-        let file_layer = fmt::layer()
-            .with_writer(file_appender)
-            .with_ansi(false)
-            .with_target(true)
-            .with_thread_ids(true);
+        let file_layer =
+            fmt::layer().with_writer(file_appender).with_ansi(false).with_target(true).with_thread_ids(true);
 
-        tracing_subscriber::registry()
-            .with(env_filter)
-            .with(console_layer)
-            .with(file_layer)
-            .init();
+        tracing_subscriber::registry().with(env_filter).with(console_layer).with(file_layer).init();
     } else {
-        tracing_subscriber::registry()
-            .with(env_filter)
-            .with(console_layer)
-            .init();
+        tracing_subscriber::registry().with(env_filter).with(console_layer).init();
     }
 }

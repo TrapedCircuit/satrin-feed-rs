@@ -10,8 +10,7 @@ pub mod json_parser;
 use std::time::Duration;
 
 use anyhow::Result;
-use k4_core::config::ConnectionConfig;
-use k4_core::ws::PingPayload;
+use k4_core::{config::ConnectionConfig, ws::PingPayload};
 
 use self::config::OkxConfig;
 use crate::pipeline::{PingConfig, ShmNames, StreamDef};
@@ -21,10 +20,8 @@ const OKX_WS_URL: &str = "wss://ws.okx.com:8443/ws/v5/public";
 /// Build OKX stream definitions from the connection config.
 pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
     let cfg = OkxConfig::from_connection(conn_config)?;
-    let ping = PingConfig {
-        interval: Duration::from_secs(cfg.ping_interval_sec),
-        payload: PingPayload::Text("ping".into()),
-    };
+    let ping =
+        PingConfig { interval: Duration::from_secs(cfg.ping_interval_sec), payload: PingPayload::Text("ping".into()) };
     let mut streams = Vec::new();
 
     if !cfg.spot_symbols.is_empty() {
@@ -42,9 +39,7 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
             },
             symbols: cfg.spot_symbols.clone(),
             md_size: cfg.md_size,
-            text_parser: Some(Box::new(|text| {
-                json_parser::parse_message(text).into_iter().collect()
-            })),
+            text_parser: Some(Box::new(|text| json_parser::parse_message(text).into_iter().collect())),
             binary_parser: None,
             custom_trade_dedup: None,
             dedup_cpu_core: None,
@@ -66,9 +61,7 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
             },
             symbols: cfg.swap_symbols.clone(),
             md_size: cfg.md_size,
-            text_parser: Some(Box::new(|text| {
-                json_parser::parse_message(text).into_iter().collect()
-            })),
+            text_parser: Some(Box::new(|text| json_parser::parse_message(text).into_iter().collect())),
             binary_parser: None,
             custom_trade_dedup: None,
             dedup_cpu_core: None,

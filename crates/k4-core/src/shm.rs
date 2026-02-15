@@ -21,8 +21,10 @@
 //! The `current_index` in each `InstrumentHeader` is atomically incremented on
 //! each write, and readers use it to locate the latest sample.
 
-use std::collections::HashMap;
-use std::sync::atomic::{AtomicI64, Ordering};
+use std::{
+    collections::HashMap,
+    sync::atomic::{AtomicI64, Ordering},
+};
 
 use crate::types::symbol::{SYMBOL_LEN, symbol_to_bytes};
 
@@ -88,8 +90,7 @@ impl<T: Copy> ShmMdStore<T> {
     /// Calculate the total mmap size needed for the given parameters.
     fn calc_size(instrument_count: usize, buffer_size: u32) -> usize {
         let header_size = std::mem::size_of::<ShmHeader>();
-        let slot_size = std::mem::size_of::<InstrumentHeader>()
-            + std::mem::size_of::<T>() * buffer_size as usize;
+        let slot_size = std::mem::size_of::<InstrumentHeader>() + std::mem::size_of::<T>() * buffer_size as usize;
         header_size + slot_size * instrument_count
     }
 
@@ -116,10 +117,7 @@ impl<T: Copy> ShmMdStore<T> {
         unsafe {
             let fd = libc::shm_open(c_name.as_ptr(), libc::O_CREAT | libc::O_RDWR, 0o666);
             if fd < 0 {
-                return Err(anyhow::anyhow!(
-                    "shm_open failed: {}",
-                    std::io::Error::last_os_error()
-                ));
+                return Err(anyhow::anyhow!("shm_open failed: {}", std::io::Error::last_os_error()));
             }
 
             if libc::ftruncate(fd, total_size as libc::off_t) != 0 {
@@ -166,17 +164,10 @@ impl<T: Copy> ShmMdStore<T> {
 
                 index.insert(sym.clone(), (inst_hdr as *mut InstrumentHeader, data_ptr));
 
-                offset += std::mem::size_of::<InstrumentHeader>()
-                    + std::mem::size_of::<T>() * buffer_size as usize;
+                offset += std::mem::size_of::<InstrumentHeader>() + std::mem::size_of::<T>() * buffer_size as usize;
             }
 
-            Ok(Self {
-                base,
-                total_size,
-                buffer_size,
-                index,
-                shm_name: shm_name.to_string(),
-            })
+            Ok(Self { base, total_size, buffer_size, index, shm_name: shm_name.to_string() })
         }
     }
 
@@ -187,8 +178,8 @@ impl<T: Copy> ShmMdStore<T> {
         let instrument_count = symbols.len();
         let total_size = Self::calc_size(instrument_count, buffer_size);
 
-        let layout = std::alloc::Layout::from_size_align(total_size, 64)
-            .map_err(|e| anyhow::anyhow!("layout error: {e}"))?;
+        let layout =
+            std::alloc::Layout::from_size_align(total_size, 64).map_err(|e| anyhow::anyhow!("layout error: {e}"))?;
 
         // SAFETY: we immediately zero-initialize the allocation.
         let base = unsafe {
@@ -217,17 +208,10 @@ impl<T: Copy> ShmMdStore<T> {
                 let data_ptr = base.add(offset + std::mem::size_of::<InstrumentHeader>()) as *mut T;
                 index.insert(sym.clone(), (inst_hdr as *mut InstrumentHeader, data_ptr));
 
-                offset += std::mem::size_of::<InstrumentHeader>()
-                    + std::mem::size_of::<T>() * buffer_size as usize;
+                offset += std::mem::size_of::<InstrumentHeader>() + std::mem::size_of::<T>() * buffer_size as usize;
             }
 
-            Ok(Self {
-                base,
-                total_size,
-                buffer_size,
-                index,
-                shm_name: shm_name.to_string(),
-            })
+            Ok(Self { base, total_size, buffer_size, index, shm_name: shm_name.to_string() })
         }
     }
 

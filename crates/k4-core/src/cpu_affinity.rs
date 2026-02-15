@@ -31,10 +31,7 @@ pub fn bind_to_core(core_id: usize) -> bool {
         }
         ok
     } else {
-        warn!(
-            "CPU core {core_id} not available (system has {} cores)",
-            core_ids.len()
-        );
+        warn!("CPU core {core_id} not available (system has {} cores)", core_ids.len());
         false
     }
 }

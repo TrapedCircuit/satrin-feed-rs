@@ -8,10 +8,12 @@
 //! and replaced with a fresh connection — this combats the exchange LB node
 //! jitter problem described in the project README.
 
+use std::time::Duration;
+
+use tracing::{info, warn};
+
 use super::client::{OnBinaryCallback, OnMessageCallback, WsConnConfig, WsConnection};
 use crate::latency::LatencyCollector;
-use std::time::Duration;
-use tracing::{info, warn};
 
 /// Configuration for the redundancy manager.
 #[derive(Debug, Clone)]
@@ -138,11 +140,7 @@ impl RedundantWsClient {
         self.connections.len()
     }
 
-    fn add_and_start_connection(
-        &mut self,
-        on_text: OnMessageCallback,
-        on_binary: Option<OnBinaryCallback>,
-    ) {
+    fn add_and_start_connection(&mut self, on_text: OnMessageCallback, on_binary: Option<OnBinaryCallback>) {
         let mut config = self.config.base_config.clone();
         config.id = self.next_conn_id;
         self.next_conn_id += 1;

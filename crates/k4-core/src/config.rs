@@ -19,8 +19,9 @@
 //! }
 //! ```
 
-use serde::Deserialize;
 use std::collections::HashMap;
+
+use serde::Deserialize;
 
 /// Top-level application config, deserialized from a JSON file.
 #[derive(Debug, Clone, Deserialize)]
@@ -105,10 +106,7 @@ impl ConnectionConfig {
 
     /// Returns the module name from the per-connection or top-level config.
     pub fn module_name(&self) -> String {
-        self.razor_trade
-            .as_ref()
-            .and_then(|m| m.module_name.clone())
-            .unwrap_or_else(|| self.exchange.clone())
+        self.razor_trade.as_ref().and_then(|m| m.module_name.clone()).unwrap_or_else(|| self.exchange.clone())
     }
 
     /// Returns the log path.
@@ -184,10 +182,7 @@ pub struct FuturesConfig {
 impl FuturesConfig {
     /// Returns the effective symbol list, checking both generic and Binance fields.
     pub fn effective_symbols(&self) -> Vec<String> {
-        self.symbols
-            .clone()
-            .or_else(|| self.ubase_symbols.clone())
-            .unwrap_or_default()
+        self.symbols.clone().or_else(|| self.ubase_symbols.clone()).unwrap_or_default()
     }
 
     /// Returns the effective redundant connection count.

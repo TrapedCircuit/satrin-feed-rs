@@ -7,10 +7,10 @@
 //!
 //! Two strategies are provided:
 //!
-//! 1. [`UpdateIdDedup`] — for exchanges that provide a monotonically increasing
-//!    sequence number per symbol (all exchanges except Bybit futures trades).
-//! 2. [`UuidDedup`] — for Bybit futures trades that use UUID trade IDs which
-//!    must be hashed and checked in a Bloom-filter-like table.
+//! 1. [`UpdateIdDedup`] — for exchanges that provide a monotonically increasing sequence number per
+//!    symbol (all exchanges except Bybit futures trades).
+//! 2. [`UuidDedup`] — for Bybit futures trades that use UUID trade IDs which must be hashed and
+//!    checked in a Bloom-filter-like table.
 
 use ahash::AHashMap;
 
@@ -32,9 +32,7 @@ pub struct UpdateIdDedup {
 
 impl UpdateIdDedup {
     pub fn new() -> Self {
-        Self {
-            last_ids: AHashMap::new(),
-        }
+        Self { last_ids: AHashMap::new() }
     }
 
     /// Check whether `update_id` is new for the given `symbol`.
@@ -94,9 +92,7 @@ pub struct UuidDedup {
 
 impl UuidDedup {
     pub fn new() -> Self {
-        Self {
-            table: vec![0u64; UUID_TABLE_SIZE],
-        }
+        Self { table: vec![0u64; UUID_TABLE_SIZE] }
     }
 
     /// Hash a UUID string using xxHash64.

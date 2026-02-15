@@ -7,8 +7,7 @@
 //! - `trade` → [`Trade`] (batch — may return multiple trades per message)
 //! - `books5` → [`Depth5`]
 
-use k4_core::time_util;
-use k4_core::*;
+use k4_core::{time_util, *};
 
 use crate::json_util::{fill_depth5_levels, parse_str_f64, parse_str_u64};
 
@@ -45,13 +44,9 @@ pub fn parse_message(text: &str) -> Vec<MarketDataMsg> {
     let product_type = product_type_from_inst_type(arg);
 
     match channel {
-        "books1" => parse_book_ticker(&v, inst_id, product_type)
-            .into_iter()
-            .collect(),
+        "books1" => parse_book_ticker(&v, inst_id, product_type).into_iter().collect(),
         "trade" => parse_trades(&v, inst_id, product_type),
-        "books5" => parse_depth5(&v, inst_id, product_type)
-            .into_iter()
-            .collect(),
+        "books5" => parse_depth5(&v, inst_id, product_type).into_iter().collect(),
         _ => vec![],
     }
 }
@@ -104,11 +99,7 @@ pub fn build_futures_subscribe(symbols: &[String]) -> String {
 // Individual parsers
 // ---------------------------------------------------------------------------
 
-fn parse_book_ticker(
-    v: &serde_json::Value,
-    inst_id: &str,
-    product_type: ProductType,
-) -> Option<MarketDataMsg> {
+fn parse_book_ticker(v: &serde_json::Value, inst_id: &str, product_type: ProductType) -> Option<MarketDataMsg> {
     let local_time = time_util::now_us();
     let data = v.get("data")?.as_array()?.first()?;
 
@@ -140,11 +131,7 @@ fn parse_book_ticker(
     Some(MarketDataMsg::Bbo(bbo))
 }
 
-fn parse_trades(
-    v: &serde_json::Value,
-    inst_id: &str,
-    product_type: ProductType,
-) -> Vec<MarketDataMsg> {
+fn parse_trades(v: &serde_json::Value, inst_id: &str, product_type: ProductType) -> Vec<MarketDataMsg> {
     let local_time = time_util::now_us();
     let data = match v.get("data").and_then(|d| d.as_array()) {
         Some(arr) => arr,
@@ -184,11 +171,7 @@ fn parse_single_trade(
     })
 }
 
-fn parse_depth5(
-    v: &serde_json::Value,
-    inst_id: &str,
-    product_type: ProductType,
-) -> Option<MarketDataMsg> {
+fn parse_depth5(v: &serde_json::Value, inst_id: &str, product_type: ProductType) -> Option<MarketDataMsg> {
     let local_time = time_util::now_us();
     let data = v.get("data")?.as_array()?.first()?;
 

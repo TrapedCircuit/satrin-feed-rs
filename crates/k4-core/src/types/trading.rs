@@ -3,8 +3,9 @@
 //! These types are used by the TD (trading) modules and flow between the
 //! strategy layer and the exchange API via message queues.
 
-use super::enums::{AccountType, Direction, OrderStatus, OrderType};
 use serde::{Deserialize, Serialize};
+
+use super::enums::{AccountType, Direction, OrderStatus, OrderType};
 
 // ---------------------------------------------------------------------------
 // Input order (strategy → TD module)

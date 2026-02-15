@@ -49,10 +49,7 @@ impl UdpMdConfig {
     ///
     /// Returns an error if the `udp_receiver` section is missing.
     pub fn from_connection(conn: &ConnectionConfig) -> Result<Self> {
-        let udp = conn
-            .udp_receiver
-            .as_ref()
-            .ok_or_else(|| anyhow!("missing udp_receiver config for UDP module"))?;
+        let udp = conn.udp_receiver.as_ref().ok_or_else(|| anyhow!("missing udp_receiver config for UDP module"))?;
 
         let listen_addr: SocketAddr = format!("{}:{}", udp.ip, udp.port).parse()?;
 

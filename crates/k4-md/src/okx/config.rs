@@ -48,36 +48,34 @@ impl OkxConfig {
         let ping_interval_sec = conn.ping_interval_sec.unwrap_or(25);
 
         // Spot config
-        let (spot_symbols, spot_conn_count, spot_bbo, spot_trade, spot_depth5) =
-            if let Some(ref spot) = conn.spot {
-                let raw = spot.symbols.clone().unwrap_or_default();
-                let converted: Vec<String> = raw.iter().map(|s| to_okx_inst_id(s)).collect();
-                (
-                    converted,
-                    spot.redun_conn_count.unwrap_or(1),
-                    spot.bbo_shm_name.clone(),
-                    spot.trade_shm_name.clone(),
-                    spot.depth5_shm_name.clone(),
-                )
-            } else {
-                (vec![], 1, None, None, None)
-            };
+        let (spot_symbols, spot_conn_count, spot_bbo, spot_trade, spot_depth5) = if let Some(ref spot) = conn.spot {
+            let raw = spot.symbols.clone().unwrap_or_default();
+            let converted: Vec<String> = raw.iter().map(|s| to_okx_inst_id(s)).collect();
+            (
+                converted,
+                spot.redun_conn_count.unwrap_or(1),
+                spot.bbo_shm_name.clone(),
+                spot.trade_shm_name.clone(),
+                spot.depth5_shm_name.clone(),
+            )
+        } else {
+            (vec![], 1, None, None, None)
+        };
 
         // Swap config (OKX uses "swap" section instead of "futures")
-        let (swap_symbols, swap_conn_count, swap_bbo, swap_trade, swap_depth5) =
-            if let Some(ref swap) = conn.swap {
-                let raw = swap.symbols.clone().unwrap_or_default();
-                let converted: Vec<String> = raw.iter().map(|s| to_okx_swap_inst_id(s)).collect();
-                (
-                    converted,
-                    swap.redun_conn_count.unwrap_or(1),
-                    swap.bbo_shm_name.clone(),
-                    swap.trade_shm_name.clone(),
-                    swap.depth5_shm_name.clone(),
-                )
-            } else {
-                (vec![], 1, None, None, None)
-            };
+        let (swap_symbols, swap_conn_count, swap_bbo, swap_trade, swap_depth5) = if let Some(ref swap) = conn.swap {
+            let raw = swap.symbols.clone().unwrap_or_default();
+            let converted: Vec<String> = raw.iter().map(|s| to_okx_swap_inst_id(s)).collect();
+            (
+                converted,
+                swap.redun_conn_count.unwrap_or(1),
+                swap.bbo_shm_name.clone(),
+                swap.trade_shm_name.clone(),
+                swap.depth5_shm_name.clone(),
+            )
+        } else {
+            (vec![], 1, None, None, None)
+        };
 
         Ok(Self {
             md_size,

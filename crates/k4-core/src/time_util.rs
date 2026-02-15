@@ -12,10 +12,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[cfg(target_os = "linux")]
 #[inline]
 fn clock_realtime() -> (u64, u64) {
-    let mut ts = libc::timespec {
-        tv_sec: 0,
-        tv_nsec: 0,
-    };
+    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
     // SAFETY: CLOCK_REALTIME is always valid. Failure returns -1 but the
     // zeroed ts is a safe fallback (epoch).
     unsafe {
@@ -27,10 +24,7 @@ fn clock_realtime() -> (u64, u64) {
 #[cfg(target_os = "linux")]
 #[inline]
 fn clock_monotonic() -> (u64, u64) {
-    let mut ts = libc::timespec {
-        tv_sec: 0,
-        tv_nsec: 0,
-    };
+    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
     unsafe {
         libc::clock_gettime(libc::CLOCK_MONOTONIC_RAW, &mut ts);
     }
@@ -44,17 +38,14 @@ fn clock_monotonic() -> (u64, u64) {
 #[cfg(not(target_os = "linux"))]
 #[inline]
 fn clock_realtime() -> (u64, u64) {
-    let d = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default();
+    let d = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default();
     (d.as_secs(), d.subsec_nanos() as u64)
 }
 
 #[cfg(not(target_os = "linux"))]
 #[inline]
 fn clock_monotonic() -> (u64, u64) {
-    use std::sync::LazyLock;
-    use std::time::Instant;
+    use std::{sync::LazyLock, time::Instant};
     static ORIGIN: LazyLock<Instant> = LazyLock::new(Instant::now);
     let d = ORIGIN.elapsed();
     (d.as_secs(), d.subsec_nanos() as u64)

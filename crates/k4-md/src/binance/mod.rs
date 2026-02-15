@@ -29,15 +29,10 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
             subscribe_msg: json_parser::build_spot_json_subscribe(&cfg.spot_symbols),
             ping: None,
             extra_headers: cfg.spot_extra_headers.clone(),
-            shm: ShmNames {
-                agg: cfg.spot_agg_shm_name.clone(),
-                ..Default::default()
-            },
+            shm: ShmNames { agg: cfg.spot_agg_shm_name.clone(), ..Default::default() },
             symbols: cfg.spot_symbols.clone(),
             md_size: cfg.md_size,
-            text_parser: Some(Box::new(|text| {
-                json_parser::parse_message(text).into_iter().collect()
-            })),
+            text_parser: Some(Box::new(|text| json_parser::parse_message(text).into_iter().collect())),
             binary_parser: None,
             custom_trade_dedup: None,
             dedup_cpu_core: None,
@@ -81,9 +76,7 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
             },
             symbols: cfg.ubase_symbols.clone(),
             md_size: cfg.md_size,
-            text_parser: Some(Box::new(|text| {
-                json_parser::parse_message(text).into_iter().collect()
-            })),
+            text_parser: Some(Box::new(|text| json_parser::parse_message(text).into_iter().collect())),
             binary_parser: None,
             custom_trade_dedup: None,
             dedup_cpu_core: None,

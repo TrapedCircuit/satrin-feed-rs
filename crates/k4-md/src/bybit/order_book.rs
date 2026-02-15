@@ -27,10 +27,7 @@ const PRICE_EPS: f64 = 1e-10;
 impl<const N: usize> OrderBook<N> {
     /// Create a new empty order book.
     pub fn new() -> Self {
-        Self {
-            bids: Vec::with_capacity(N),
-            asks: Vec::with_capacity(N),
-        }
+        Self { bids: Vec::with_capacity(N), asks: Vec::with_capacity(N) }
     }
 
     /// Replace the entire book with a snapshot.
@@ -40,13 +37,11 @@ impl<const N: usize> OrderBook<N> {
     pub fn set_snapshot(&mut self, bids: &[[f64; 2]], asks: &[[f64; 2]]) {
         self.bids.clear();
         self.bids.extend_from_slice(&bids[..bids.len().min(N)]);
-        self.bids
-            .sort_by(|a, b| b[0].partial_cmp(&a[0]).unwrap_or(std::cmp::Ordering::Equal));
+        self.bids.sort_by(|a, b| b[0].partial_cmp(&a[0]).unwrap_or(std::cmp::Ordering::Equal));
 
         self.asks.clear();
         self.asks.extend_from_slice(&asks[..asks.len().min(N)]);
-        self.asks
-            .sort_by(|a, b| a[0].partial_cmp(&b[0]).unwrap_or(std::cmp::Ordering::Equal));
+        self.asks.sort_by(|a, b| a[0].partial_cmp(&b[0]).unwrap_or(std::cmp::Ordering::Equal));
     }
 
     /// Apply an incremental delta to the book.
@@ -88,14 +83,7 @@ impl<const N: usize> OrderBook<N> {
             ask_vols[i] = self.asks[i][1];
         }
 
-        (
-            bid_prices,
-            bid_vols,
-            ask_prices,
-            ask_vols,
-            bid_levels as u32,
-            ask_levels as u32,
-        )
+        (bid_prices, bid_vols, ask_prices, ask_vols, bid_levels as u32, ask_levels as u32)
     }
 
     /// Returns `true` if the book has no levels on either side.
@@ -125,10 +113,7 @@ fn update_side_desc(levels: &mut Vec<[f64; 2]>, price: f64, vol: f64, max_levels
         }
     } else if vol > 0.0 {
         // Insert at correct position (descending order — higher prices first).
-        let pos = levels
-            .iter()
-            .position(|l| l[0] < price)
-            .unwrap_or(levels.len());
+        let pos = levels.iter().position(|l| l[0] < price).unwrap_or(levels.len());
         levels.insert(pos, [price, vol]);
         if levels.len() > max_levels {
             levels.pop(); // Remove worst (lowest) bid
@@ -146,10 +131,7 @@ fn update_side_asc(levels: &mut Vec<[f64; 2]>, price: f64, vol: f64, max_levels:
         }
     } else if vol > 0.0 {
         // Insert at correct position (ascending order — lower prices first).
-        let pos = levels
-            .iter()
-            .position(|l| l[0] > price)
-            .unwrap_or(levels.len());
+        let pos = levels.iter().position(|l| l[0] > price).unwrap_or(levels.len());
         levels.insert(pos, [price, vol]);
         if levels.len() > max_levels {
             levels.pop(); // Remove worst (highest) ask
@@ -165,22 +147,8 @@ mod tests {
     fn snapshot_and_depth5() {
         let mut book = OrderBook::<50>::new();
         book.set_snapshot(
-            &[
-                [100.0, 1.0],
-                [99.0, 2.0],
-                [98.0, 3.0],
-                [97.0, 4.0],
-                [96.0, 5.0],
-                [95.0, 6.0],
-            ],
-            &[
-                [101.0, 1.0],
-                [102.0, 2.0],
-                [103.0, 3.0],
-                [104.0, 4.0],
-                [105.0, 5.0],
-                [106.0, 6.0],
-            ],
+            &[[100.0, 1.0], [99.0, 2.0], [98.0, 3.0], [97.0, 4.0], [96.0, 5.0], [95.0, 6.0]],
+            &[[101.0, 1.0], [102.0, 2.0], [103.0, 3.0], [104.0, 4.0], [105.0, 5.0], [106.0, 6.0]],
         );
 
         let (bp, bv, ap, av, bl, al) = book.get_depth5();

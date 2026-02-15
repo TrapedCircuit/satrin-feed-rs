@@ -17,18 +17,13 @@ pub mod json_parser;
 pub mod order_book;
 pub mod uuid_dedup;
 
-use std::sync::Mutex;
-use std::time::Duration;
+use std::{sync::Mutex, time::Duration};
 
 use ahash::AHashMap;
 use anyhow::Result;
-use k4_core::config::ConnectionConfig;
-use k4_core::dedup::UuidDedup;
-use k4_core::types::*;
-use k4_core::ws::PingPayload;
+use k4_core::{config::ConnectionConfig, dedup::UuidDedup, types::*, ws::PingPayload};
 
-use self::config::BybitConfig;
-use self::order_book::OrderBook;
+use self::{config::BybitConfig, order_book::OrderBook};
 use crate::pipeline::{PingConfig, ShmNames, StreamDef};
 
 const BYBIT_SPOT_WS_URL: &str = "wss://stream.bybit.com:443/v5/public/spot";
@@ -74,13 +69,12 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
 
         // UUID dedup for futures trades (wrapped in Mutex for Fn closure)
         let uuid_dedup = Mutex::new(UuidDedup::new());
-        let custom_dedup: Box<dyn FnMut(&str, u64) -> bool + Send> =
-            Box::new(move |_sym, trade_id| {
-                // trade_id was already hashed from UUID by the parser.
-                // We use the raw hash as the dedup key.
-                let mut d = uuid_dedup.lock().unwrap();
-                d.check_and_insert(&format!("{trade_id}"))
-            });
+        let custom_dedup: crate::dedup_worker::TradeDeduper = Box::new(move |_sym, trade_id| {
+            // trade_id was already hashed from UUID by the parser.
+            // We use the raw hash as the dedup key.
+            let mut d = uuid_dedup.lock().unwrap();
+            d.check_and_insert(&format!("{trade_id}"))
+        });
 
         streams.push(StreamDef {
             label: "bybit_futures".into(),
@@ -112,9 +106,7 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
 /// The closure captures a per-symbol `OrderBook<50>` map. When an
 /// `orderbook.50` snapshot or delta arrives, the closure updates the book
 /// and emits a `Depth5` message.
-fn make_bybit_parser(
-    product_type: ProductType,
-) -> Box<dyn Fn(&str) -> Vec<MarketDataMsg> + Send + Sync> {
+fn make_bybit_parser(product_type: ProductType) -> crate::pipeline::TextParser {
     let books: Mutex<AHashMap<String, OrderBook<50>>> = Mutex::new(AHashMap::new());
 
     Box::new(move |text| parse_to_market_data(text, product_type, &books))
@@ -139,10 +131,7 @@ fn parse_to_market_data(
 
     if topic.starts_with("orderbook.1.") {
         // BBO — pass through directly
-        json_parser::parse_bbo(&v, product_type)
-            .into_iter()
-            .map(MarketDataMsg::Bbo)
-            .collect()
+        json_parser::parse_bbo(&v, product_type).into_iter().map(MarketDataMsg::Bbo).collect()
     } else if topic.starts_with("publicTrade.") {
         // Trades — convert to MarketDataMsg::Trade
         json_parser::parse_trades_to_md(&v, product_type)

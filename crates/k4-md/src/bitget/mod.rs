@@ -10,8 +10,7 @@ pub mod json_parser;
 use std::time::Duration;
 
 use anyhow::Result;
-use k4_core::config::ConnectionConfig;
-use k4_core::ws::PingPayload;
+use k4_core::{config::ConnectionConfig, ws::PingPayload};
 
 use self::config::BitgetConfig;
 use crate::pipeline::{PingConfig, ShmNames, StreamDef};
@@ -21,10 +20,8 @@ const BITGET_WS_URL: &str = "wss://ws.bitget.com:443/v2/ws/public";
 /// Build Bitget stream definitions from the connection config.
 pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
     let cfg = BitgetConfig::from_connection(conn_config)?;
-    let ping = PingConfig {
-        interval: Duration::from_secs(cfg.ping_interval_sec),
-        payload: PingPayload::Text("ping".into()),
-    };
+    let ping =
+        PingConfig { interval: Duration::from_secs(cfg.ping_interval_sec), payload: PingPayload::Text("ping".into()) };
     let mut streams = Vec::new();
 
     if !cfg.spot_symbols.is_empty() {

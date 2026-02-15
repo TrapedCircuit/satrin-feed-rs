@@ -4,8 +4,7 @@
 //! `MarketDataMsg` variants. Uses `serde_json` for parsing and `fast-float`
 //! for high-performance string-to-f64 conversion.
 
-use k4_core::time_util;
-use k4_core::*;
+use k4_core::{time_util, *};
 
 use crate::json_util::{fill_depth5_levels, parse_f64_field};
 
@@ -27,10 +26,7 @@ pub fn parse_message(text: &str) -> Option<MarketDataMsg> {
 
 /// Build subscription message for Spot JSON (aggTrade only).
 pub fn build_spot_json_subscribe(symbols: &[String]) -> String {
-    let params: Vec<String> = symbols
-        .iter()
-        .map(|s| format!("{}@aggTrade", s.to_lowercase()))
-        .collect();
+    let params: Vec<String> = symbols.iter().map(|s| format!("{}@aggTrade", s.to_lowercase())).collect();
     serde_json::json!({
         "method": "SUBSCRIBE",
         "params": params,
@@ -81,11 +77,7 @@ pub fn build_ubase_subscribe(symbols: &[String]) -> String {
 fn parse_agg_trade(v: &serde_json::Value) -> Option<MarketDataMsg> {
     let local_time = time_util::now_us();
     let sym = v.get("s")?.as_str()?;
-    let product_type = if v.get("ps").is_some() {
-        ProductType::Futures
-    } else {
-        ProductType::Spot
-    };
+    let product_type = if v.get("ps").is_some() { ProductType::Futures } else { ProductType::Spot };
 
     let agg = AggTrade {
         symbol: symbol_to_bytes(sym),
@@ -108,11 +100,7 @@ fn parse_agg_trade(v: &serde_json::Value) -> Option<MarketDataMsg> {
 fn parse_book_ticker(v: &serde_json::Value) -> Option<MarketDataMsg> {
     let local_time = time_util::now_us();
     let sym = v.get("s")?.as_str()?;
-    let product_type = if v.get("ps").is_some() {
-        ProductType::Futures
-    } else {
-        ProductType::Spot
-    };
+    let product_type = if v.get("ps").is_some() { ProductType::Futures } else { ProductType::Spot };
 
     let bbo = Bookticker {
         symbol: symbol_to_bytes(sym),
@@ -135,11 +123,7 @@ fn parse_book_ticker(v: &serde_json::Value) -> Option<MarketDataMsg> {
 fn parse_trade(v: &serde_json::Value) -> Option<MarketDataMsg> {
     let local_time = time_util::now_us();
     let sym = v.get("s")?.as_str()?;
-    let product_type = if v.get("ps").is_some() {
-        ProductType::Futures
-    } else {
-        ProductType::Spot
-    };
+    let product_type = if v.get("ps").is_some() { ProductType::Futures } else { ProductType::Spot };
 
     let trade = Trade {
         symbol: symbol_to_bytes(sym),

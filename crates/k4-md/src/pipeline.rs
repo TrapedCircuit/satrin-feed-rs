@@ -14,20 +14,17 @@
 //!          ──► GenericMd.stop()       ──► abort all tasks
 //! ```
 
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use anyhow::Result;
 use async_trait::async_trait;
-use k4_core::shm::ShmMdStore;
-use k4_core::types::*;
-use k4_core::udp::UdpSender;
-use k4_core::ws::PingPayload;
+use k4_core::{shm::ShmMdStore, types::*, udp::UdpSender, ws::PingPayload};
 use tracing::info;
 
-use crate::dedup_worker::{self, ProductShmStores, TradeDeduper};
-use crate::ws_helper;
+use crate::{
+    dedup_worker::{self, ProductShmStores, TradeDeduper},
+    ws_helper,
+};
 
 // ---------------------------------------------------------------------------
 // StreamDef — describes one WS-to-SHM pipeline
@@ -109,13 +106,7 @@ impl GenericMd {
     /// `binance::build()`, `okx::build()`, etc.
     pub fn new(name: String, streams: Vec<StreamDef>) -> Self {
         let n = streams.len();
-        Self {
-            name,
-            streams,
-            stores: (0..n).map(|_| None).collect(),
-            udp: None,
-            tasks: Vec::new(),
-        }
+        Self { name, streams, stores: (0..n).map(|_| None).collect(), udp: None, tasks: Vec::new() }
     }
 }
 
@@ -135,35 +126,15 @@ impl crate::MdModule for GenericMd {
             let shm = &stream.shm;
 
             let stores = ProductShmStores {
-                bbo: shm
-                    .bbo
-                    .as_ref()
-                    .map(|n| ShmMdStore::create(n, syms, md_size))
-                    .transpose()?,
-                agg: shm
-                    .agg
-                    .as_ref()
-                    .map(|n| ShmMdStore::create(n, syms, md_size))
-                    .transpose()?,
-                trade: shm
-                    .trade
-                    .as_ref()
-                    .map(|n| ShmMdStore::create(n, syms, md_size))
-                    .transpose()?,
-                depth5: shm
-                    .depth5
-                    .as_ref()
-                    .map(|n| ShmMdStore::create(n, syms, md_size))
-                    .transpose()?,
+                bbo: shm.bbo.as_ref().map(|n| ShmMdStore::create(n, syms, md_size)).transpose()?,
+                agg: shm.agg.as_ref().map(|n| ShmMdStore::create(n, syms, md_size)).transpose()?,
+                trade: shm.trade.as_ref().map(|n| ShmMdStore::create(n, syms, md_size)).transpose()?,
+                depth5: shm.depth5.as_ref().map(|n| ShmMdStore::create(n, syms, md_size)).transpose()?,
             };
             self.stores[i] = Some(stores);
         }
 
-        info!(
-            "[{}] SHM initialized ({} streams)",
-            self.name,
-            self.streams.len()
-        );
+        info!("[{}] SHM initialized ({} streams)", self.name, self.streams.len());
         Ok(())
     }
 
@@ -178,13 +149,12 @@ impl crate::MdModule for GenericMd {
                 None => continue, // no symbols → no stores → skip
             };
 
-            let stream = &self.streams[i];
+            let stream = &mut self.streams[i];
             let label = stream.label.clone();
             let url = stream.ws_url.clone();
             let sub_msg = stream.subscribe_msg.clone();
             let headers = stream.extra_headers.clone();
-            let ping_interval = stream.ping.as_ref().map(|p| p.interval);
-            let ping_payload = stream.ping.as_ref().map(|p| p.payload.clone());
+            let ping = stream.ping.clone();
             let cpu_core = stream.dedup_cpu_core;
 
             // Create dedup channel
@@ -193,7 +163,7 @@ impl crate::MdModule for GenericMd {
             // Spawn dedup task
             let udp = self.udp.clone();
             let dedup_label = label.clone();
-            let custom_td = self.streams[i].custom_trade_dedup.take();
+            let custom_td = stream.custom_trade_dedup.take();
 
             self.tasks.push(tokio::task::spawn_blocking(move || {
                 dedup_worker::run_dedup_loop(&dedup_label, rx, stores, udp, custom_td, cpu_core);
@@ -202,31 +172,29 @@ impl crate::MdModule for GenericMd {
             // Spawn WS task
             if let Some(binary_parser) = self.streams[i].binary_parser.take() {
                 let ws_label = label.clone();
-                let tx_clone = tx.clone();
                 self.tasks.push(tokio::spawn(async move {
-                    ws_helper::run_ws_binary_stream(
+                    ws_helper::run_ws_binary_stream(ws_helper::BinaryStreamParams {
                         url,
-                        sub_msg,
-                        headers,
-                        tx_clone,
-                        binary_parser,
-                        ws_label,
-                    )
+                        subscribe_msg: sub_msg,
+                        extra_headers: headers,
+                        tx,
+                        parser: binary_parser,
+                        label: ws_label,
+                    })
                     .await;
                 }));
             } else if let Some(text_parser) = self.streams[i].text_parser.take() {
                 let ws_label = label.clone();
                 self.tasks.push(tokio::spawn(async move {
-                    ws_helper::run_ws_text_stream(
+                    ws_helper::run_ws_text_stream(ws_helper::TextStreamParams {
                         url,
-                        sub_msg,
-                        headers,
-                        ping_interval,
-                        ping_payload,
+                        subscribe_msg: sub_msg,
+                        extra_headers: headers,
+                        ping,
                         tx,
-                        text_parser,
-                        ws_label,
-                    )
+                        parser: text_parser,
+                        label: ws_label,
+                    })
                     .await;
                 }));
             }

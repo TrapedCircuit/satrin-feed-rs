@@ -31,13 +31,7 @@ impl std::fmt::Display for LatencyStats {
         write!(
             f,
             "n={} min={}µs max={}µs avg={:.1}µs p50={}µs p90={}µs p99={}µs",
-            self.count,
-            self.min_us,
-            self.max_us,
-            self.avg_us,
-            self.p50_us,
-            self.p90_us,
-            self.p99_us,
+            self.count, self.min_us, self.max_us, self.avg_us, self.p50_us, self.p90_us, self.p99_us,
         )
     }
 }
@@ -56,13 +50,7 @@ pub struct LatencyCollector {
 impl LatencyCollector {
     /// Create a new, empty collector.
     pub fn new() -> Self {
-        Self {
-            bins: vec![0u64; NUM_BINS],
-            count: 0,
-            sum: 0,
-            min: u64::MAX,
-            max: 0,
-        }
+        Self { bins: vec![0u64; NUM_BINS], count: 0, sum: 0, min: u64::MAX, max: 0 }
     }
 
     /// Record a latency sample in microseconds.

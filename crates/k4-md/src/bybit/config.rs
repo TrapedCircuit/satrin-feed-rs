@@ -46,32 +46,31 @@ impl BybitConfig {
         let ping_interval_sec = conn.ping_interval_sec.unwrap_or(20);
 
         // Spot config
-        let (spot_symbols, spot_conn_count, spot_bbo, spot_trade, spot_depth5) =
-            if let Some(ref spot) = conn.spot {
-                (
-                    spot.symbols.clone().unwrap_or_default(),
-                    spot.redun_conn_count.unwrap_or(1),
-                    spot.bbo_shm_name.clone(),
-                    spot.trade_shm_name.clone(),
-                    spot.depth5_shm_name.clone(),
-                )
-            } else {
-                (vec![], 1, None, None, None)
-            };
+        let (spot_symbols, spot_conn_count, spot_bbo, spot_trade, spot_depth5) = if let Some(ref spot) = conn.spot {
+            (
+                spot.symbols.clone().unwrap_or_default(),
+                spot.redun_conn_count.unwrap_or(1),
+                spot.bbo_shm_name.clone(),
+                spot.trade_shm_name.clone(),
+                spot.depth5_shm_name.clone(),
+            )
+        } else {
+            (vec![], 1, None, None, None)
+        };
 
         // Futures config (linear / USDT-margined)
-        let (futures_symbols, futures_conn_count, fut_bbo, fut_trade, fut_depth5) =
-            if let Some(ref fut) = conn.futures {
-                (
-                    fut.effective_symbols(),
-                    fut.effective_conn_count(),
-                    fut.bbo_shm_name.clone(),
-                    fut.trade_shm_name.clone(),
-                    fut.depth5_shm_name.clone(),
-                )
-            } else {
-                (vec![], 1, None, None, None)
-            };
+        let (futures_symbols, futures_conn_count, fut_bbo, fut_trade, fut_depth5) = if let Some(ref fut) = conn.futures
+        {
+            (
+                fut.effective_symbols(),
+                fut.effective_conn_count(),
+                fut.bbo_shm_name.clone(),
+                fut.trade_shm_name.clone(),
+                fut.depth5_shm_name.clone(),
+            )
+        } else {
+            (vec![], 1, None, None, None)
+        };
 
         Ok(Self {
             md_size,

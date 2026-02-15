@@ -11,8 +11,7 @@
 
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
 
-use super::enums::ProductType;
-use super::symbol::SYMBOL_LEN;
+use super::{enums::ProductType, symbol::SYMBOL_LEN};
 
 // ---------------------------------------------------------------------------
 // Bookticker (Best Bid / Offer)
@@ -220,11 +219,7 @@ impl std::fmt::Display for Trade {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let sym = super::symbol::symbol_from_bytes(&self.symbol);
         let side = if self.is_buyer_maker { "SELL" } else { "BUY" };
-        write!(
-            f,
-            "Trade({sym} {side} {:.8}x{:.4} id={})",
-            self.price, self.vol, self.trade_id
-        )
+        write!(f, "Trade({sym} {side} {:.8}x{:.4} id={})", self.price, self.vol, self.trade_id)
     }
 }
 
@@ -232,11 +227,7 @@ impl std::fmt::Display for AggTrade {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let sym = super::symbol::symbol_from_bytes(&self.symbol);
         let side = if self.is_buyer_maker { "SELL" } else { "BUY" };
-        write!(
-            f,
-            "AggTrade({sym} {side} {:.8}x{:.4} id={})",
-            self.price, self.vol, self.agg_trade_id
-        )
+        write!(f, "AggTrade({sym} {side} {:.8}x{:.4} id={})", self.price, self.vol, self.agg_trade_id)
     }
 }
 

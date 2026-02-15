@@ -19,10 +19,7 @@ use tracing::{error, info};
 
 /// Crypto Gateway Market Data & Trading Runner.
 #[derive(Parser)]
-#[command(
-    name = "k4-runner",
-    about = "Crypto Gateway Market Data & Trading Runner"
-)]
+#[command(name = "k4-runner", about = "Crypto Gateway Market Data & Trading Runner")]
 struct Cli {
     /// Configuration file path (JSON).
     config: PathBuf,
@@ -43,11 +40,7 @@ async fn main() -> Result<()> {
     // 1. Initialize logging
     k4_core::logging::init_logging(&cli.log_level, cli.log_dir.as_deref(), "k4-runner");
 
-    info!(
-        "k4-runner starting — config={}, log_level={}",
-        cli.config.display(),
-        cli.log_level,
-    );
+    info!("k4-runner starting — config={}, log_level={}", cli.config.display(), cli.log_level,);
 
     // 2. Load configuration
     let config = k4_core::config::load_config(&cli.config)?;
@@ -59,18 +52,11 @@ async fn main() -> Result<()> {
     for (idx, conn_config) in config.connections.iter().enumerate() {
         match k4_md::registry::create_md_module(conn_config) {
             Ok(module) => {
-                info!(
-                    "connection[{idx}]: created MD module '{}' (exchange={})",
-                    module.name(),
-                    conn_config.exchange,
-                );
+                info!("connection[{idx}]: created MD module '{}' (exchange={})", module.name(), conn_config.exchange,);
                 md_modules.push(module);
             }
             Err(e) => {
-                error!(
-                    "connection[{idx}]: failed to create module for '{}': {e}",
-                    conn_config.exchange,
-                );
+                error!("connection[{idx}]: failed to create module for '{}': {e}", conn_config.exchange,);
             }
         }
     }
@@ -86,10 +72,7 @@ async fn main() -> Result<()> {
         info!("module '{}' started", module.name());
     }
 
-    info!(
-        "all {} module(s) started — press Ctrl+C to stop",
-        md_modules.len(),
-    );
+    info!("all {} module(s) started — press Ctrl+C to stop", md_modules.len(),);
 
     // 4. Wait for shutdown signal
     tokio::signal::ctrl_c().await?;

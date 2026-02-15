@@ -22,9 +22,11 @@
 //! | Place order | `order.place`  |
 //! | Cancel order| `order.cancel` |
 
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+};
 
 use anyhow::{Context, Result, anyhow};
 use futures_util::{SinkExt, StreamExt};
@@ -59,10 +61,7 @@ impl WsApiInner {
             map.insert(id.to_string(), tx);
         }
 
-        self.tx
-            .send(payload.to_string())
-            .await
-            .context("WS API send channel closed")?;
+        self.tx.send(payload.to_string()).await.context("WS API send channel closed")?;
 
         let response = tokio::time::timeout(Duration::from_secs(5), rx)
             .await
@@ -104,13 +103,7 @@ pub struct SpotClient {
 
 impl SpotClient {
     /// Create a new spot client (no connections opened yet).
-    pub fn new(
-        api_key: String,
-        secret_key: String,
-        base_url: String,
-        ws_api_url: String,
-        recv_window: u64,
-    ) -> Self {
+    pub fn new(api_key: String, secret_key: String, base_url: String, ws_api_url: String, recv_window: u64) -> Self {
         Self {
             http: reqwest::Client::new(),
             api_key,
@@ -139,11 +132,7 @@ impl SpotClient {
             .await
             .context("create listen key request failed")?;
 
-        let body: serde_json::Value = resp
-            .error_for_status()
-            .context("create listen key HTTP error")?
-            .json()
-            .await?;
+        let body: serde_json::Value = resp.error_for_status().context("create listen key HTTP error")?.json().await?;
 
         let key = body
             .get("listenKey")
@@ -208,23 +197,13 @@ impl SpotClient {
     pub async fn get_account_info(&self) -> Result<serde_json::Value> {
         let timestamp = current_timestamp_ms();
         let query = auth::build_signed_query(
-            &[
-                ("recvWindow", &self.recv_window.to_string()),
-                ("timestamp", &timestamp),
-            ],
+            &[("recvWindow", &self.recv_window.to_string()), ("timestamp", &timestamp)],
             &self.secret_key,
         );
 
         let url = format!("{}/api/v3/account?{}", self.base_url, query);
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .header("X-MBX-APIKEY", &self.api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value =
+            self.http.get(&url).header("X-MBX-APIKEY", &self.api_key).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -242,15 +221,8 @@ impl SpotClient {
         let query = auth::build_signed_query(&params, &self.secret_key);
         let url = format!("{}/api/v3/openOrders?{}", self.base_url, query);
 
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .header("X-MBX-APIKEY", &self.api_key)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value =
+            self.http.get(&url).header("X-MBX-APIKEY", &self.api_key).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -258,14 +230,7 @@ impl SpotClient {
     /// Fetch exchange info (symbol list, filters, etc.).
     pub async fn get_exchange_info(&self) -> Result<serde_json::Value> {
         let url = format!("{}/api/v3/exchangeInfo", self.base_url);
-        let resp: serde_json::Value = self
-            .http
-            .get(&url)
-            .send()
-            .await?
-            .error_for_status()?
-            .json()
-            .await?;
+        let resp: serde_json::Value = self.http.get(&url).send().await?.error_for_status()?.json().await?;
 
         Ok(resp)
     }
@@ -325,25 +290,15 @@ impl SpotClient {
 
         let signature = auth::hmac_sha256_sign(
             &self.secret_key,
-            &params
-                .iter()
-                .map(|(k, v)| format!("{k}={v}"))
-                .collect::<Vec<_>>()
-                .join("&"),
+            &params.iter().map(|(k, v)| format!("{k}={v}")).collect::<Vec<_>>().join("&"),
         );
 
         let mut params_map = serde_json::Map::new();
         for (k, v) in &params {
             params_map.insert(k.to_string(), serde_json::Value::String(v.to_string()));
         }
-        params_map.insert(
-            "apiKey".to_string(),
-            serde_json::Value::String(self.api_key.clone()),
-        );
-        params_map.insert(
-            "signature".to_string(),
-            serde_json::Value::String(signature),
-        );
+        params_map.insert("apiKey".to_string(), serde_json::Value::String(self.api_key.clone()));
+        params_map.insert("signature".to_string(), serde_json::Value::String(signature));
 
         let payload = serde_json::json!({
             "id": id,
@@ -379,25 +334,15 @@ impl SpotClient {
             params.push(("origClientOrderId", cid.to_string()));
         }
 
-        let query_str: String = params
-            .iter()
-            .map(|(k, v)| format!("{k}={v}"))
-            .collect::<Vec<_>>()
-            .join("&");
+        let query_str: String = params.iter().map(|(k, v)| format!("{k}={v}")).collect::<Vec<_>>().join("&");
         let signature = auth::hmac_sha256_sign(&self.secret_key, &query_str);
 
         let mut params_map = serde_json::Map::new();
         for (k, v) in &params {
             params_map.insert(k.to_string(), serde_json::Value::String(v.clone()));
         }
-        params_map.insert(
-            "apiKey".to_string(),
-            serde_json::Value::String(self.api_key.clone()),
-        );
-        params_map.insert(
-            "signature".to_string(),
-            serde_json::Value::String(signature),
-        );
+        params_map.insert("apiKey".to_string(), serde_json::Value::String(self.api_key.clone()));
+        params_map.insert("signature".to_string(), serde_json::Value::String(signature));
 
         let payload = serde_json::json!({
             "id": id,
@@ -416,9 +361,8 @@ impl SpotClient {
     async fn connect_ws_api(&self) -> Result<WsApiInner> {
         use tokio_tungstenite::tungstenite::Message;
 
-        let (ws_stream, _) = tokio_tungstenite::connect_async(&self.ws_api_url)
-            .await
-            .context("WS API connection failed")?;
+        let (ws_stream, _) =
+            tokio_tungstenite::connect_async(&self.ws_api_url).await.context("WS API connection failed")?;
 
         let (mut ws_write, mut ws_read) = ws_stream.split();
         let (tx, mut rx) = tokio::sync::mpsc::channel::<String>(64);
@@ -487,9 +431,5 @@ impl SpotClient {
 
 /// Returns the current Unix timestamp in milliseconds.
 fn current_timestamp_ms() -> String {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_millis()
-        .to_string()
+    SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis().to_string()
 }

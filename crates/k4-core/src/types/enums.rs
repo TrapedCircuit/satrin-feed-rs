@@ -42,19 +42,7 @@ impl std::fmt::Display for Exchange {
 ///
 /// Maps to the C++ `ProductType` enum. The discriminant values are preserved
 /// for wire-format compatibility with the UDP schema.
-#[derive(
-    Debug,
-    Clone,
-    Copy,
-    PartialEq,
-    Eq,
-    Hash,
-    Serialize,
-    Deserialize,
-    Archive,
-    RkyvSerialize,
-    RkyvDeserialize,
-)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Archive, RkyvSerialize, RkyvDeserialize)]
 #[repr(u8)]
 #[derive(Default)]
 pub enum ProductType {

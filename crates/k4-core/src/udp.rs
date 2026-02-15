@@ -10,11 +10,12 @@
 //! └────────────┴────────────────────────────────────┘
 //! ```
 
-use crate::types::{AggTrade, Bookticker, Depth5, MarketDataMsg, MessageType, Trade};
 use std::net::SocketAddr;
-use tokio::net::UdpSocket;
-use tokio::sync::mpsc;
+
+use tokio::{net::UdpSocket, sync::mpsc};
 use tracing::{debug, error, warn};
+
+use crate::types::{AggTrade, Bookticker, Depth5, MarketDataMsg, MessageType, Trade};
 
 /// Maximum UDP payload size.
 const MAX_UDP_PAYLOAD: usize = 65507;
@@ -81,20 +82,10 @@ fn encode_msg(msg: &MarketDataMsg) -> Option<Vec<u8>> {
 
     type E = rkyv::rancor::Error;
     match msg {
-        MarketDataMsg::Bbo(d) => Some(with_type(
-            MessageType::BookTicker,
-            rkyv::to_bytes::<E>(d).ok()?,
-        )),
-        MarketDataMsg::Trade(d) => {
-            Some(with_type(MessageType::Trade, rkyv::to_bytes::<E>(d).ok()?))
-        }
-        MarketDataMsg::AggTrade(d) => Some(with_type(
-            MessageType::AggTrade,
-            rkyv::to_bytes::<E>(d).ok()?,
-        )),
-        MarketDataMsg::Depth5(d) => {
-            Some(with_type(MessageType::Depth5, rkyv::to_bytes::<E>(d).ok()?))
-        }
+        MarketDataMsg::Bbo(d) => Some(with_type(MessageType::BookTicker, rkyv::to_bytes::<E>(d).ok()?)),
+        MarketDataMsg::Trade(d) => Some(with_type(MessageType::Trade, rkyv::to_bytes::<E>(d).ok()?)),
+        MarketDataMsg::AggTrade(d) => Some(with_type(MessageType::AggTrade, rkyv::to_bytes::<E>(d).ok()?)),
+        MarketDataMsg::Depth5(d) => Some(with_type(MessageType::Depth5, rkyv::to_bytes::<E>(d).ok()?)),
     }
 }
 

@@ -7,8 +7,7 @@
 //! - `trades` → [`Trade`]
 //! - `books5` → [`Depth5`]
 
-use k4_core::time_util;
-use k4_core::*;
+use k4_core::{time_util, *};
 
 use crate::json_util::{fill_depth5_levels, parse_str_f64, parse_str_i32, parse_str_u64};
 
@@ -183,11 +182,7 @@ fn parse_depth5(v: &serde_json::Value, inst_id: &str) -> Option<MarketDataMsg> {
 ///
 /// Symbols ending in `-SWAP` are swap/futures, otherwise spot.
 fn product_type_from_inst_id(inst_id: &str) -> ProductType {
-    if inst_id.ends_with("-SWAP") {
-        ProductType::Futures
-    } else {
-        ProductType::Spot
-    }
+    if inst_id.ends_with("-SWAP") { ProductType::Futures } else { ProductType::Spot }
 }
 
 #[cfg(test)]

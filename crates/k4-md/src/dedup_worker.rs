@@ -7,10 +7,7 @@
 use std::sync::Arc;
 
 use crossbeam_channel::Receiver;
-use k4_core::dedup::UpdateIdDedup;
-use k4_core::shm::ShmMdStore;
-use k4_core::types::*;
-use k4_core::udp::UdpSender;
+use k4_core::{dedup::UpdateIdDedup, shm::ShmMdStore, types::*, udp::UdpSender};
 use tracing::info;
 
 /// Bundled SHM stores for one product (spot or futures).

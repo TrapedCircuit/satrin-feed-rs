@@ -4,8 +4,7 @@
 //! trade parsing produce `MarketDataMsg` directly. Depth parsing is handled
 //! in `mod.rs` via the stateful OrderBook closure.
 
-use k4_core::time_util;
-use k4_core::*;
+use k4_core::{time_util, *};
 
 use crate::json_util::parse_str_f64;
 
@@ -13,13 +12,7 @@ use crate::json_util::parse_str_f64;
 pub fn build_subscribe(symbols: &[String]) -> String {
     let args: Vec<String> = symbols
         .iter()
-        .flat_map(|s| {
-            vec![
-                format!("publicTrade.{s}"),
-                format!("orderbook.1.{s}"),
-                format!("orderbook.50.{s}"),
-            ]
-        })
+        .flat_map(|s| vec![format!("publicTrade.{s}"), format!("orderbook.1.{s}"), format!("orderbook.50.{s}")])
         .collect();
 
     serde_json::json!({
@@ -97,9 +90,7 @@ fn parse_single_trade(
     let side = item.get("S")?.as_str()?;
 
     // Spot: numeric trade ID. Futures: UUID -> xxhash64.
-    let trade_id: u64 = raw_id
-        .parse()
-        .unwrap_or_else(|_| xxhash_rust::xxh64::xxh64(raw_id.as_bytes(), 0));
+    let trade_id: u64 = raw_id.parse().unwrap_or_else(|_| xxhash_rust::xxh64::xxh64(raw_id.as_bytes(), 0));
 
     Some(Trade {
         symbol: symbol_to_bytes(sym),
