@@ -256,30 +256,28 @@ async fn connection_loop(
 }
 
 /// Establish a TLS WebSocket connection.
+///
+/// Uses `tungstenite::IntoClientRequest` to properly generate the
+/// `Sec-WebSocket-Key` and upgrade headers. Extra HTTP headers (e.g. API
+/// key for Binance SBE) are injected after the request is built.
 async fn connect_ws(
     config: &WsConnConfig,
 ) -> anyhow::Result<
     tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
 > {
-    use tokio_tungstenite::tungstenite::http::Request;
+    use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 
-    let mut request = Request::builder()
-        .uri(&config.url)
-        .header("Host", extract_host(&config.url));
+    // Let tungstenite generate proper WS handshake headers from the URL.
+    let mut request = config.url.as_str().into_client_request()?;
 
+    // Inject any extra headers (e.g. X-MBX-APIKEY for Binance SBE).
     for (key, value) in &config.extra_headers {
-        request = request.header(key.as_str(), value.as_str());
+        request.headers_mut().insert(
+            tokio_tungstenite::tungstenite::http::HeaderName::from_bytes(key.as_bytes())?,
+            tokio_tungstenite::tungstenite::http::HeaderValue::from_str(value)?,
+        );
     }
-
-    let request = request.body(())?;
 
     let (stream, _response) = tokio_tungstenite::connect_async(request).await?;
     Ok(stream)
-}
-
-/// Extract the host from a URL string.
-fn extract_host(url: &str) -> String {
-    url::Url::parse(url)
-        .map(|u| u.host_str().unwrap_or("").to_string())
-        .unwrap_or_default()
 }
