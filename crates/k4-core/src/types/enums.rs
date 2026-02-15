@@ -1,4 +1,4 @@
-//! Enumerations used throughout the K4 Crypto system.
+//! Enumerations used throughout the crypto-gateway system.
 //!
 //! These enums map 1:1 to the C++ definitions in `K4_CryptoDatatype.h` and
 //! `K4_Struct.h`, providing a type-safe Rust equivalent.

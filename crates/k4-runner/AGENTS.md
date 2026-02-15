@@ -1,6 +1,6 @@
 # k4-runner
 
-Main executable entry point for the K4 Crypto system.
+Main executable entry point for the crypto-gateway system.
 
 ## CLI
 

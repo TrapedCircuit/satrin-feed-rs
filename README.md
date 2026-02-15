@@ -1,4 +1,4 @@
-# satrin-feed-rs
+# crypto-gateway-rs
 
 Low-latency, multi-source, redundant cryptocurrency market data and trading system — Rust implementation.
 

@@ -1,4 +1,4 @@
-//! Typed error definitions for the K4 Crypto system.
+//! Typed error definitions for the crypto-gateway system.
 //!
 //! Provides [`K4Error`] for domain-specific errors that are more informative
 //! than plain `anyhow::Error` strings. All variants implement `std::error::Error`
@@ -6,7 +6,7 @@
 
 use thiserror::Error;
 
-/// Domain-specific errors for the K4 Crypto system.
+/// Domain-specific errors for the crypto-gateway system.
 #[derive(Debug, Error)]
 pub enum K4Error {
     /// Configuration parsing or validation error.

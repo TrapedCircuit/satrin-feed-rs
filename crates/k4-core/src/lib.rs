@@ -1,6 +1,6 @@
 //! # k4-core
 //!
-//! Core crate for the K4 Crypto system, providing:
+//! Core crate for the crypto-gateway system, providing:
 //!
 //! - **Types** (`types`) — enums, market data structs, trading structs, symbol utils
 //! - **Configuration** (`config`) — JSON config deserialization

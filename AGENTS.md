@@ -1,4 +1,4 @@
-# satrin-feed-rs
+# crypto-gateway-rs
 
 ## Overview
 

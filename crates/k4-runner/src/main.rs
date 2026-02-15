@@ -1,6 +1,6 @@
 //! # k4-runner
 //!
-//! Main entry point for the K4 Crypto trading system.
+//! Main entry point for the crypto-gateway system.
 //!
 //! Loads a JSON configuration file, creates market data and trading modules
 //! for each configured exchange connection, and manages their lifecycle.
@@ -17,9 +17,12 @@ use anyhow::Result;
 use clap::Parser;
 use tracing::{error, info};
 
-/// K4 Crypto Market Data & Trading Runner.
+/// Crypto Gateway Market Data & Trading Runner.
 #[derive(Parser)]
-#[command(name = "k4-runner", about = "K4 Crypto Market Data & Trading Runner")]
+#[command(
+    name = "k4-runner",
+    about = "Crypto Gateway Market Data & Trading Runner"
+)]
 struct Cli {
     /// Configuration file path (JSON).
     config: PathBuf,

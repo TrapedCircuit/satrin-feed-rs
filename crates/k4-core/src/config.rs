@@ -1,4 +1,4 @@
-//! Configuration parsing for the K4 Crypto system.
+//! Configuration parsing for the crypto-gateway system.
 //!
 //! All modules read their settings from a single JSON config file. The top-level
 //! structure contains logging metadata and a `connections` array where each entry
