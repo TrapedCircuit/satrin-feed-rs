@@ -12,5 +12,6 @@ tracing = { workspace = true }
 ahash = { workspace = true }
 crossbeam-channel = { workspace = true }
 fast-float2 = { workspace = true }
+simd-json = { workspace = true }
 xxhash-rust = { workspace = true }
 async-trait = "0.1"

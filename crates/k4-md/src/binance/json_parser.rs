@@ -1,8 +1,8 @@
 //! Binance JSON message parser.
 //!
 //! Parses WebSocket JSON messages from Binance Spot and UBase streams into
-//! `MarketDataMsg` variants. Uses `serde_json` for parsing and `fast-float`
-//! for high-performance string-to-f64 conversion.
+//! `MarketDataMsg` variants. Uses `simd-json` for SIMD-accelerated parsing
+//! and `fast-float` for high-performance string-to-f64 conversion.
 
 use k4_core::{time_util, *};
 
@@ -10,9 +10,10 @@ use crate::json_util::{fill_depth5_levels, parse_f64_field};
 
 /// Parse a Binance JSON WebSocket message into a MarketDataMsg.
 ///
+/// Accepts `&mut [u8]` for simd-json in-place parsing.
 /// Returns `None` for messages that are not market data (e.g. subscription acks).
-pub fn parse_message(text: &str) -> Option<MarketDataMsg> {
-    let v: serde_json::Value = serde_json::from_str(text).ok()?;
+pub fn parse_message(data: &mut [u8]) -> Option<MarketDataMsg> {
+    let v: serde_json::Value = simd_json::serde::from_slice(data).ok()?;
 
     let event_type = v.get("e")?.as_str()?;
     match event_type {
@@ -143,13 +144,14 @@ fn parse_trade(v: &serde_json::Value) -> Option<MarketDataMsg> {
 fn parse_depth_update(v: &serde_json::Value) -> Option<MarketDataMsg> {
     let local_time = time_util::now_us();
     let sym = v.get("s")?.as_str()?;
+    let product_type = if v.get("ps").is_some() { ProductType::Futures } else { ProductType::Spot };
 
     let bids = v.get("b")?.as_array()?;
     let asks = v.get("a")?.as_array()?;
 
     let mut depth = Depth5 {
         symbol: symbol_to_bytes(sym),
-        product_type: ProductType::Futures,
+        product_type,
         event_timestamp_us: v.get("E").and_then(|e| e.as_u64()).unwrap_or(0) * 1000,
         trade_timestamp_us: v.get("T").and_then(|t| t.as_u64()).unwrap_or(0) * 1000,
         update_id: v.get("u")?.as_u64()?,
@@ -176,8 +178,8 @@ mod tests {
 
     #[test]
     fn parse_agg_trade_msg() {
-        let json = r#"{"e":"aggTrade","E":1672515782136,"s":"BTCUSDT","a":123456789,"p":"16500.50","q":"0.001","f":100,"l":105,"T":1672515782136,"m":true}"#;
-        let msg = parse_message(json).unwrap();
+        let mut json = br#"{"e":"aggTrade","E":1672515782136,"s":"BTCUSDT","a":123456789,"p":"16500.50","q":"0.001","f":100,"l":105,"T":1672515782136,"m":true}"#.to_vec();
+        let msg = parse_message(&mut json).unwrap();
         match msg {
             MarketDataMsg::AggTrade(agg) => {
                 assert_eq!(symbol_from_bytes(&agg.symbol), "BTCUSDT");
@@ -191,8 +193,8 @@ mod tests {
 
     #[test]
     fn parse_book_ticker_msg() {
-        let json = r#"{"e":"bookTicker","u":400900217,"s":"BTCUSDT","b":"25.35190000","B":"31.21000000","a":"25.36520000","A":"40.66000000","E":1672515782136,"T":1672515782136}"#;
-        let msg = parse_message(json).unwrap();
+        let mut json = br#"{"e":"bookTicker","u":400900217,"s":"BTCUSDT","b":"25.35190000","B":"31.21000000","a":"25.36520000","A":"40.66000000","E":1672515782136,"T":1672515782136}"#.to_vec();
+        let msg = parse_message(&mut json).unwrap();
         match msg {
             MarketDataMsg::Bbo(bbo) => {
                 assert_eq!(symbol_from_bytes(&bbo.symbol), "BTCUSDT");

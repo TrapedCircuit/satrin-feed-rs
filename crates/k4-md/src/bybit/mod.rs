@@ -109,17 +109,17 @@ pub fn build(conn_config: &ConnectionConfig) -> Result<Vec<StreamDef>> {
 fn make_bybit_parser(product_type: ProductType) -> crate::pipeline::TextParser {
     let books: Mutex<AHashMap<String, OrderBook<50>>> = Mutex::new(AHashMap::new());
 
-    Box::new(move |text| parse_to_market_data(text, product_type, &books))
+    Box::new(move |data| parse_to_market_data(data, product_type, &books))
 }
 
 /// Parse a Bybit JSON message into `Vec<MarketDataMsg>`, managing OrderBook
 /// state for incremental depth updates.
 fn parse_to_market_data(
-    text: &str,
+    data: &mut [u8],
     product_type: ProductType,
     books: &Mutex<AHashMap<String, OrderBook<50>>>,
 ) -> Vec<MarketDataMsg> {
-    let v: serde_json::Value = match serde_json::from_str(text) {
+    let v: serde_json::Value = match simd_json::serde::from_slice(data) {
         Ok(v) => v,
         Err(_) => return vec![],
     };

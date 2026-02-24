@@ -26,12 +26,13 @@ pub struct TextStreamParams<F> {
 /// them to the dedup channel. Blocks until cancelled.
 pub async fn run_ws_text_stream<F>(params: TextStreamParams<F>)
 where
-    F: Fn(&str) -> Vec<MarketDataMsg> + Send + Sync + 'static,
+    F: Fn(&mut [u8]) -> Vec<MarketDataMsg> + Send + Sync + 'static,
 {
     let TextStreamParams { url, subscribe_msg, extra_headers, ping, tx, parser, label } = params;
 
     let on_msg: OnMessageCallback = Arc::new(move |_conn_id, text| {
-        for msg in parser(text) {
+        let mut buf = text.as_bytes().to_vec();
+        for msg in parser(&mut buf) {
             if tx.try_send(msg).is_err() {
                 warn!("[{label}] dedup channel full");
             }

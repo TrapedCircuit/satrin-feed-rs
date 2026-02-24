@@ -30,8 +30,11 @@ use crate::{
 // StreamDef — describes one WS-to-SHM pipeline
 // ---------------------------------------------------------------------------
 
-/// A text message parser: `raw_json -> Vec<MarketDataMsg>`.
-pub type TextParser = Box<dyn Fn(&str) -> Vec<MarketDataMsg> + Send + Sync>;
+/// A text message parser: `raw_bytes -> Vec<MarketDataMsg>`.
+///
+/// Accepts `&mut [u8]` so that `simd-json` can perform in-place SIMD parsing.
+/// The caller is responsible for providing a mutable copy of the raw text.
+pub type TextParser = Box<dyn Fn(&mut [u8]) -> Vec<MarketDataMsg> + Send + Sync>;
 
 /// A binary message parser: `raw_bytes -> Vec<MarketDataMsg>`.
 pub type BinaryParser = Box<dyn Fn(&[u8]) -> Vec<MarketDataMsg> + Send + Sync>;

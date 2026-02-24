@@ -13,14 +13,14 @@ use crate::json_util::{fill_depth5_levels, parse_str_f64, parse_str_i32, parse_s
 
 /// Parse an OKX JSON WebSocket message into a [`MarketDataMsg`].
 ///
+/// Accepts `&mut [u8]` for simd-json in-place parsing.
 /// Returns `None` for non-data messages (subscription acks, pong, etc.).
-pub fn parse_message(text: &str) -> Option<MarketDataMsg> {
-    // OKX echoes "pong" in response to our "ping".
-    if text == "pong" {
+pub fn parse_message(data: &mut [u8]) -> Option<MarketDataMsg> {
+    if data == b"pong" {
         return None;
     }
 
-    let v: serde_json::Value = serde_json::from_str(text).ok()?;
+    let v: serde_json::Value = simd_json::serde::from_slice(data).ok()?;
 
     let arg = v.get("arg")?;
     let channel = arg.get("channel")?.as_str()?;
@@ -191,7 +191,7 @@ mod tests {
 
     #[test]
     fn parse_bbo_tbt() {
-        let json = r#"{
+        let mut json = br#"{
             "arg": {"channel": "bbo-tbt", "instId": "BTC-USDT"},
             "data": [{
                 "asks": [["30000.1", "0.5", "0", "3"]],
@@ -199,8 +199,9 @@ mod tests {
                 "ts": "1672515782136",
                 "seqId": "123456789"
             }]
-        }"#;
-        let msg = parse_message(json).unwrap();
+        }"#
+        .to_vec();
+        let msg = parse_message(&mut json).unwrap();
         match msg {
             MarketDataMsg::Bbo(bbo) => {
                 assert_eq!(symbol_from_bytes(&bbo.symbol), "BTC-USDT");
@@ -217,7 +218,7 @@ mod tests {
 
     #[test]
     fn parse_trade_msg() {
-        let json = r#"{
+        let mut json = br#"{
             "arg": {"channel": "trades", "instId": "BTC-USDT-SWAP"},
             "data": [{
                 "tradeId": "987654321",
@@ -226,8 +227,9 @@ mod tests {
                 "side": "sell",
                 "ts": "1672515782200"
             }]
-        }"#;
-        let msg = parse_message(json).unwrap();
+        }"#
+        .to_vec();
+        let msg = parse_message(&mut json).unwrap();
         match msg {
             MarketDataMsg::Trade(trade) => {
                 assert_eq!(symbol_from_bytes(&trade.symbol), "BTC-USDT-SWAP");
@@ -241,6 +243,6 @@ mod tests {
 
     #[test]
     fn pong_returns_none() {
-        assert!(parse_message("pong").is_none());
+        assert!(parse_message(&mut b"pong".to_vec()).is_none());
     }
 }

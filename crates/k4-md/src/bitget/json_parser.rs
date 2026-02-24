@@ -13,15 +13,15 @@ use crate::json_util::{fill_depth5_levels, parse_str_f64, parse_str_u64};
 
 /// Parse a Bitget JSON WebSocket message into zero or more [`MarketDataMsg`].
 ///
+/// Accepts `&mut [u8]` for simd-json in-place parsing.
 /// Returns an empty `Vec` for non-data messages (subscription acks, pong, etc.).
 /// Trade messages may produce multiple results since Bitget batches trades.
-pub fn parse_message(text: &str) -> Vec<MarketDataMsg> {
-    // Bitget echoes "pong" in response to our "ping".
-    if text == "pong" {
+pub fn parse_message(data: &mut [u8]) -> Vec<MarketDataMsg> {
+    if data == b"pong" {
         return vec![];
     }
 
-    let v: serde_json::Value = match serde_json::from_str(text) {
+    let v: serde_json::Value = match simd_json::serde::from_slice(data) {
         Ok(v) => v,
         Err(_) => return vec![],
     };
@@ -224,7 +224,7 @@ mod tests {
 
     #[test]
     fn parse_books1_bbo() {
-        let json = r#"{
+        let mut json = br#"{
             "arg": {"instType": "SPOT", "channel": "books1", "instId": "BTCUSDT"},
             "ts": "1672515782136",
             "data": [{
@@ -233,8 +233,9 @@ mod tests {
                 "ts": "1672515782135",
                 "seq": "123456789"
             }]
-        }"#;
-        let msgs = parse_message(json);
+        }"#
+        .to_vec();
+        let msgs = parse_message(&mut json);
         assert_eq!(msgs.len(), 1);
         match &msgs[0] {
             MarketDataMsg::Bbo(bbo) => {
@@ -249,15 +250,16 @@ mod tests {
 
     #[test]
     fn parse_trade_batch() {
-        let json = r#"{
+        let mut json = br#"{
             "arg": {"instType": "SPOT", "channel": "trade", "instId": "BTCUSDT"},
             "data": [
                 {"tradeId": "3", "price": "30002", "size": "0.1", "side": "buy", "ts": "1672515782138"},
                 {"tradeId": "2", "price": "30001", "size": "0.2", "side": "sell", "ts": "1672515782137"},
                 {"tradeId": "1", "price": "30000", "size": "0.3", "side": "buy", "ts": "1672515782136"}
             ]
-        }"#;
-        let msgs = parse_message(json);
+        }"#
+        .to_vec();
+        let msgs = parse_message(&mut json);
         assert_eq!(msgs.len(), 3);
         // Should be reversed: oldest first
         match &msgs[0] {
@@ -272,6 +274,6 @@ mod tests {
 
     #[test]
     fn pong_returns_empty() {
-        assert!(parse_message("pong").is_empty());
+        assert!(parse_message(&mut b"pong".to_vec()).is_empty());
     }
 }
